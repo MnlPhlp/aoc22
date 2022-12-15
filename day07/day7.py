@@ -30,7 +30,6 @@ while currentDir != "/":
 
 values = []
 for d in dirs:
-    print(d, dirs[d])
     if dirs[d] <= maxSize:
         values.append(dirs[d])
 
