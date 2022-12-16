@@ -1,2 +1,8 @@
+# ignore files without extension
+*
+!*.*
+!*/
+!.gitignore
+
 bin
 obj

@@ -29,4 +29,9 @@ func main() {
 	sort.Ints(calories)
 	maxCalories := calories[len(calories)-1]
 	fmt.Printf("Max calories: %d\n", maxCalories)
+	topCalories := 0
+	for _, cal := range calories[len(calories)-3:] {
+		topCalories += cal
+	}
+	fmt.Printf("Top calories: %d\n", topCalories)
 }
