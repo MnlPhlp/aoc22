@@ -1,4 +1,4 @@
-package main
+package day08
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 func parseInput() [][]int {
 	// read input into 2d array
-	f, _ := os.ReadFile("input.txt")
+	f, _ := os.ReadFile("day08/input.txt")
 	lines := strings.Split(string(f), "\n")
 	grid := make([][]int, len(lines))
 	for row, line := range lines {
@@ -97,7 +97,7 @@ func countVisible(grid [][]int) (int, int, [2]int) {
 	return visible, maxScenic, scenicPos
 }
 
-func main() {
+func Solve(test bool) {
 	start := time.Now()
 	// read input into 2d array
 	grid := parseInput()

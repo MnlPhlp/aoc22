@@ -1,7 +1,6 @@
-package main
+package day09
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -143,20 +142,18 @@ func makeMoves(moves []move, knotCount int, test bool) map[vec2]bool {
 	return visited
 }
 
-func main() {
-	test := flag.Bool("test", false, "Run test")
-	flag.Parse()
+func Solve(test bool) {
 	var input []byte
-	if *test {
-		input, _ = os.ReadFile("testInput.txt")
+	if test {
+		input, _ = os.ReadFile("day09/testInput.txt")
 	} else {
-		input, _ = os.ReadFile("input.txt")
+		input, _ = os.ReadFile("day09/input.txt")
 	}
 	moves := parseMoves(string(input))
 	fmt.Printf("Doing %d moves with 2 knots\n", len(moves))
-	visited := makeMoves(moves, 2, *test)
+	visited := makeMoves(moves, 2, test)
 	fmt.Printf("Visited %d locations\n", len(visited))
 	fmt.Printf("Doing %d moves with 10 knots\n", len(moves))
-	visited = makeMoves(moves, 10, *test)
+	visited = makeMoves(moves, 10, test)
 	fmt.Printf("Visited %d locations\n", len(visited))
 }
