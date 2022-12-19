@@ -11,6 +11,7 @@ import (
 	"gitlab.com/mnlphlp/aoc22/day10"
 	"gitlab.com/mnlphlp/aoc22/day11"
 	"gitlab.com/mnlphlp/aoc22/day12"
+	"gitlab.com/mnlphlp/aoc22/day13"
 )
 
 func notImplemented(day int) func(bool) {
@@ -32,6 +33,18 @@ var dayFuncs = [...]func(bool){
 	day10.Solve,
 	day11.Solve,
 	day12.Solve,
+	day13.Solve,
+	notImplemented(14),
+	notImplemented(15),
+	notImplemented(16),
+	notImplemented(17),
+	notImplemented(18),
+	notImplemented(19),
+	notImplemented(20),
+	notImplemented(21),
+	notImplemented(22),
+	notImplemented(23),
+	notImplemented(24),
 }
 
 func main() {
