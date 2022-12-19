@@ -3,6 +3,7 @@ package day13
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -26,7 +27,16 @@ func (i item) String() string {
 	if i.leaf {
 		return fmt.Sprintf("%d", i.value)
 	}
-	return fmt.Sprintf("%v", i.values)
+	text := "["
+	for _, item := range i.values {
+		text += item.String()
+		text += ","
+	}
+	if len(text) > 1 {
+		text = text[:len(text)-1]
+	}
+	text += "]"
+	return text
 }
 
 func getParts(line string) []string {
@@ -102,6 +112,18 @@ func parseInput(inputFile string) []pair {
 	return pairs
 }
 
+func parse2(inputFile string) []item {
+	items := make([]item, 0)
+	input, _ := os.ReadFile(inputFile)
+	for _, line := range strings.Split(string(input), "\n") {
+		if len(line) == 0 {
+			continue
+		}
+		items = append(items, parseItem(line))
+	}
+	return items
+}
+
 func checkPair(p pair) (bool, bool) {
 	// both are leafs
 	if p.left.leaf && p.right.leaf {
@@ -157,4 +179,27 @@ func Solve(test bool) {
 	fmt.Println()
 	fmt.Println("result task 1: ", result)
 	checkPair(pairs[7])
+
+	// task 2
+	items := parse2(inputFile)
+	items = append(items, parseItem("[[2]]"))
+	items = append(items, parseItem("[[6]]"))
+
+	sort.Slice(items, func(i, j int) bool {
+		ok, _ := checkPair(pair{left: items[i], right: items[j]})
+		return ok
+	})
+
+	key1, key2 := 0, 0
+	for i, item := range items {
+		if item.String() == "[[2]]" {
+			key1 = i + 1
+		}
+		if item.String() == "[[6]]" {
+			key2 = i + 1
+		}
+	}
+	fmt.Println("Key 1: ", key1)
+	fmt.Println("Key 2: ", key2)
+	fmt.Println("result task 2: ", key1*key2)
 }

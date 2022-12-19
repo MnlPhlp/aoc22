@@ -51,9 +51,9 @@ func TestParser(t *testing.T) {
 	pairs := parseInput("input.txt")
 	text := ""
 	for _, pair := range pairs {
-		text += printItem(pair.left)
+		text += pair.left.String()
 		text += "\n"
-		text += printItem(pair.right)
+		text += pair.right.String()
 		text += "\n\n"
 	}
 	os.WriteFile("output.txt", []byte(text), 0644)
