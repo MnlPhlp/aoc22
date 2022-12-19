@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type instruction struct {
@@ -32,7 +33,8 @@ func parseInput(inputFile string) []instruction {
 	return instructions
 }
 
-func Solve(test bool) {
+func Solve(test bool) (string, string, time.Duration) {
+	start := time.Now()
 	inputFile := "day10/input.txt"
 	if test {
 		inputFile = "day10/testInput.txt"
@@ -60,6 +62,7 @@ func Solve(test bool) {
 		}
 	}
 	fmt.Printf("Value sum: %d\n", valueSum)
+	res1 := strconv.Itoa(valueSum)
 
 	// Task 2
 	screenWidth := 40
@@ -71,15 +74,18 @@ func Solve(test bool) {
 			screen[c/screenWidth][c%screenWidth] = true
 		}
 	}
+	res2 := ""
 	// print screen
 	for _, row := range screen {
 		for _, pixel := range row {
 			if pixel {
-				fmt.Print("##")
+				res2 += "##"
 			} else {
-				fmt.Print("..")
+				res2 += ".."
 			}
 		}
-		fmt.Println()
+		res2 += "\n"
 	}
+	fmt.Printf("Screen:\n%s", res2)
+	return res1, "<img>", time.Since(start)
 }

@@ -1,4 +1,4 @@
-package main
+package day01
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func sumCalories(elfes []string) []int {
@@ -22,16 +23,24 @@ func sumCalories(elfes []string) []int {
 	return calories
 }
 
-func main() {
-	input, _ := os.ReadFile("input.txt")
+func Solve(test bool) (string, string, time.Duration) {
+	start := time.Now()
+	res1 := ""
+	res2 := ""
+
+	input, _ := os.ReadFile("day01/input.txt")
 	elfes := strings.Split(string(input), "\n\n")
 	calories := sumCalories(elfes)
 	sort.Ints(calories)
 	maxCalories := calories[len(calories)-1]
+	res1 = fmt.Sprintf("%d", maxCalories)
 	fmt.Printf("Max calories: %d\n", maxCalories)
 	topCalories := 0
 	for _, cal := range calories[len(calories)-3:] {
 		topCalories += cal
 	}
 	fmt.Printf("Top calories: %d\n", topCalories)
+	res2 = fmt.Sprintf("%d", topCalories)
+
+	return res1, res2, time.Since(start)
 }

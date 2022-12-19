@@ -1,9 +1,10 @@
-package main
+package day02
 
 import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -66,8 +67,9 @@ func calcScore2(line string) int {
 	return score
 }
 
-func main() {
-	input, _ := os.ReadFile("input.txt")
+func Solve(test bool) (string, string, time.Duration) {
+	start := time.Now()
+	input, _ := os.ReadFile("day02/input.txt")
 	lines := strings.Split(string(input), "\n")
 	score := 0
 	for _, line := range lines {
@@ -77,6 +79,7 @@ func main() {
 		score += calcScore(line)
 	}
 	fmt.Printf("Score 1: %v\n", score)
+	res1 := fmt.Sprintf("%d", score)
 
 	score = 0
 	for _, line := range lines {
@@ -86,4 +89,6 @@ func main() {
 		score += calcScore2(line)
 	}
 	fmt.Printf("Score 2: %v\n", score)
+	res2 := fmt.Sprintf("%d", score)
+	return res1, res2, time.Since(start)
 }

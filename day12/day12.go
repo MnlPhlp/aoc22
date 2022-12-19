@@ -3,7 +3,9 @@ package day12
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func handleErr[T any](val T, err error) T {
@@ -163,7 +165,8 @@ func resetGrid(grid [][]*node) {
 	}
 }
 
-func Solve(test bool) {
+func Solve(test bool) (string, string, time.Duration) {
+	startTime := time.Now()
 	var inputFile string
 	if test {
 		inputFile = "day12/testInput.txt"
@@ -180,6 +183,7 @@ func Solve(test bool) {
 	}
 
 	fmt.Println("Result Task 1: ", len(path)-1)
+	res1 := strconv.Itoa(len(path) - 1)
 
 	// reset the nodes
 	resetGrid(grid)
@@ -205,4 +209,6 @@ func Solve(test bool) {
 	}
 
 	fmt.Println("Result Task 2: ", len(path)-1)
+	res2 := strconv.Itoa(len(path) - 1)
+	return res1, res2, time.Since(startTime)
 }

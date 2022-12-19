@@ -3,6 +3,7 @@ package day08
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -97,7 +98,7 @@ func countVisible(grid [][]int) (int, int, [2]int) {
 	return visible, maxScenic, scenicPos
 }
 
-func Solve(test bool) {
+func Solve(test bool) (string, string, time.Duration) {
 	start := time.Now()
 	// read input into 2d array
 	grid := parseInput()
@@ -108,4 +109,5 @@ func Solve(test bool) {
 	println(visible)
 	println(mostScenic, " at ", scenicPos[0], ",", scenicPos[1])
 	fmt.Printf("Parse: %v\nCalc: %v\n", parse, count)
+	return strconv.Itoa(visible), strconv.Itoa(mostScenic), time.Since(start)
 }

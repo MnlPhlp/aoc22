@@ -1,9 +1,10 @@
-package main
+package day03
 
 import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 func findDuplicate(r string) byte {
@@ -51,8 +52,9 @@ func findBadges(rucksacks []string) []byte {
 	return badges
 }
 
-func main() {
-	input, _ := os.ReadFile("input.txt")
+func Solve(test bool) (string, string, time.Duration) {
+	start := time.Now()
+	input, _ := os.ReadFile("day03/input.txt")
 	rucksacks := strings.Split(string(input), "\n")
 	// remove empty line
 	rucksacks = rucksacks[:len(rucksacks)-1]
@@ -62,6 +64,7 @@ func main() {
 		sum += getPriority(duplicate)
 	}
 	fmt.Println("Result 1:", sum)
+	res1 := fmt.Sprint(sum)
 	badgeSum := 0
 	badges := findBadges(rucksacks)
 	for _, b := range badges {
@@ -72,4 +75,6 @@ func main() {
 	}
 	fmt.Println()
 	fmt.Println("Result 2:", badgeSum)
+	res2 := fmt.Sprint(badgeSum)
+	return res1, res2, time.Since(start)
 }

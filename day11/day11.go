@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type monkey struct {
@@ -103,7 +104,8 @@ func parseInput(input string) []monkey {
 	return monkeys
 }
 
-func Solve(test bool) {
+func Solve(test bool) (string, string, time.Duration) {
+	start := time.Now()
 	var input []byte
 	if test {
 		input, _ = os.ReadFile("day11/testInput.txt")
@@ -139,7 +141,9 @@ func Solve(test bool) {
 	sort.Slice(monkeys, func(i, j int) bool {
 		return monkeys[i].inspected > monkeys[j].inspected
 	})
-	fmt.Println("Result Task 1: ", monkeys[0].inspected*monkeys[1].inspected)
+	res1_int := monkeys[0].inspected * monkeys[1].inspected
+	fmt.Println("Result Task 1: ", res1_int)
+	res1 := strconv.Itoa(res1_int)
 
 	// Task 2
 	// reset monkeys
@@ -159,6 +163,8 @@ func Solve(test bool) {
 	sort.Slice(monkeys, func(i, j int) bool {
 		return monkeys[i].inspected > monkeys[j].inspected
 	})
-	fmt.Println("Result Task 2: ", monkeys[0].inspected*monkeys[1].inspected)
-
+	res2_int := monkeys[0].inspected * monkeys[1].inspected
+	fmt.Println("Result Task 2: ", res2_int)
+	res2 := strconv.Itoa(res2_int)
+	return res1, res2, time.Since(start)
 }

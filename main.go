@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
+	"gitlab.com/mnlphlp/aoc22/day01"
+	"gitlab.com/mnlphlp/aoc22/day02"
+	"gitlab.com/mnlphlp/aoc22/day03"
+	"gitlab.com/mnlphlp/aoc22/day04"
 	"gitlab.com/mnlphlp/aoc22/day08"
 	"gitlab.com/mnlphlp/aoc22/day09"
 	"gitlab.com/mnlphlp/aoc22/day10"
@@ -14,17 +19,27 @@ import (
 	"gitlab.com/mnlphlp/aoc22/day13"
 )
 
-func notImplemented(day int) func(bool) {
-	return func(b bool) {
+func notImplemented(day int) func(bool) (string, string, time.Duration) {
+	return func(b bool) (string, string, time.Duration) {
+		start := time.Now()
 		fmt.Printf("day %v is not implemented in go\n", day)
+		return "       not", "done in go", time.Since(start)
 	}
 }
 
-var dayFuncs = [...]func(bool){
-	notImplemented(1),
-	notImplemented(2),
-	notImplemented(3),
-	notImplemented(4),
+func wrap(f func(bool)) func(bool) (string, string, time.Duration) {
+	return func(b bool) (string, string, time.Duration) {
+		start := time.Now()
+		f(b)
+		return "       old", "signature", time.Since(start)
+	}
+}
+
+var dayFuncs = [...]func(bool) (string, string, time.Duration){
+	day01.Solve,
+	day02.Solve,
+	day03.Solve,
+	day04.Solve,
 	notImplemented(5),
 	notImplemented(6),
 	notImplemented(7),
@@ -73,9 +88,24 @@ func main() {
 
 	fmt.Printf("calculating days: %v \n", days)
 
+	results1 := make([]string, len(days))
+	results2 := make([]string, len(days))
+	times := make([]float32, len(days))
+
+	start := time.Now()
 	for _, day := range days {
 		fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
-		dayFuncs[day-1](*test)
+		res1, res2, time := dayFuncs[day-1](*test)
+		results1[day-1] = res1
+		results2[day-1] = res2
+		times[day-1] = float32(time.Microseconds()) / 1000
 	}
+	overall := float32(time.Since(start).Microseconds()) / 1000
+
+	fmt.Println("\n\n###########\n# Results #\n###########")
+	for i, day := range days {
+		fmt.Printf("day %2d:  %-15s  %-15s  (%6.2f ms / %.2f %%)\n", day, results1[i], results2[i], times[i], times[i]/overall*100)
+	}
+	fmt.Printf("Overall Time: %.2f s\n", overall/1000)
 
 }

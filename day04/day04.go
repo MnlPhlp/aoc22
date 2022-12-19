@@ -1,10 +1,11 @@
-package main
+package day04
 
 import (
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type secRange struct {
@@ -23,7 +24,7 @@ func (p pair) overlap() bool {
 }
 
 func parseInput() []pair {
-	input, _ := os.ReadFile("input.txt")
+	input, _ := os.ReadFile("day04/input.txt")
 	lines := strings.Split(string(input), "\n")
 	lines = lines[:len(lines)-1]
 	pairs := make([]pair, len(lines))
@@ -39,7 +40,8 @@ func parseInput() []pair {
 	return pairs
 }
 
-func main() {
+func Solve(test bool) (string, string, time.Duration) {
+	start := time.Now()
 	pairs := parseInput()
 
 	count := 0
@@ -49,6 +51,7 @@ func main() {
 		}
 	}
 	fmt.Printf("fully overlapping pairs: %v\n", count)
+	res1 := strconv.Itoa(count)
 
 	count = 0
 	for _, p := range pairs {
@@ -57,4 +60,6 @@ func main() {
 		}
 	}
 	fmt.Printf("overlapping pairs: %v\n", count)
+	res2 := strconv.Itoa(count)
+	return res1, res2, time.Since(start)
 }
