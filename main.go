@@ -17,6 +17,7 @@ import (
 	"gitlab.com/mnlphlp/aoc22/day11"
 	"gitlab.com/mnlphlp/aoc22/day12"
 	"gitlab.com/mnlphlp/aoc22/day13"
+	"gitlab.com/mnlphlp/aoc22/day14"
 )
 
 func notImplemented(day int) func(bool) (string, string, time.Duration) {
@@ -24,14 +25,6 @@ func notImplemented(day int) func(bool) (string, string, time.Duration) {
 		start := time.Now()
 		fmt.Printf("day %v is not implemented in go\n", day)
 		return "       not", "done in go", time.Since(start)
-	}
-}
-
-func wrap(f func(bool)) func(bool) (string, string, time.Duration) {
-	return func(b bool) (string, string, time.Duration) {
-		start := time.Now()
-		f(b)
-		return "       old", "signature", time.Since(start)
 	}
 }
 
@@ -49,7 +42,7 @@ var dayFuncs = [...]func(bool) (string, string, time.Duration){
 	day11.Solve,
 	day12.Solve,
 	day13.Solve,
-	notImplemented(14),
+	day14.Solve,
 	notImplemented(15),
 	notImplemented(16),
 	notImplemented(17),
@@ -88,23 +81,23 @@ func main() {
 
 	fmt.Printf("calculating days: %v \n", days)
 
-	results1 := make([]string, len(days))
-	results2 := make([]string, len(days))
-	times := make([]float32, len(days))
+	results1 := make([]string, 0, len(days))
+	results2 := make([]string, 0, len(days))
+	times := make([]float32, 0, len(days))
 
 	start := time.Now()
 	for _, day := range days {
 		fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
 		res1, res2, time := dayFuncs[day-1](*test)
-		results1[day-1] = res1
-		results2[day-1] = res2
-		times[day-1] = float32(time.Microseconds()) / 1000
+		results1 = append(results1, res1)
+		results2 = append(results2, res2)
+		times = append(times, float32(time.Microseconds())/1000)
 	}
 	overall := float32(time.Since(start).Microseconds()) / 1000
 
 	fmt.Println("\n\n###########\n# Results #\n###########")
 	for i, day := range days {
-		fmt.Printf("day %2d:  %-15s  %-15s  (%6.2f ms / %.2f %%)\n", day, results1[i], results2[i], times[i], times[i]/overall*100)
+		fmt.Printf("day %2d:  %-15s  %-15s  (%6.2f ms / %5.2f %%)\n", day, results1[i], results2[i], times[i], times[i]/overall*100)
 	}
 	fmt.Printf("Overall Time: %.2f s\n", overall/1000)
 
