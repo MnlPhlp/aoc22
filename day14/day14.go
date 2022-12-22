@@ -75,14 +75,8 @@ func parseInput(inputFile string) cave {
 				}
 			}
 			lastPoint = p
-			if p.x < cave.min.x {
-				cave.min.x = p.x
-			}
 			if p.y < cave.min.y {
 				cave.min.y = p.y
-			}
-			if p.x > cave.max.x {
-				cave.max.x = p.x
 			}
 			if p.y > cave.max.y {
 				cave.max.y = p.y
@@ -92,43 +86,18 @@ func parseInput(inputFile string) cave {
 	return cave
 }
 
-func drawFrame(cave *cave, frameDir string, frame int) {
-	frameFile := fmt.Sprintf("%s/frame%05d.png", frameDir, frame)
-	colors := map[byte]color.Color{
-		'#': color.RGBA{0, 0, 0, 255},
-		'o': color.RGBA{255, 255, 0, 255},
-	}
-	img := image.NewRGBA(image.Rect(cave.min.x-1, cave.min.y, cave.max.x+1, cave.max.y))
-	for x := cave.min.x - 1; x <= cave.max.x+1; x++ {
-		for y := cave.min.y; y <= cave.max.y; y++ {
-			if v, ok := cave.grid[point{x, y}]; ok {
-				img.Set(x, y, colors[v])
-			} else if cave.floor != 0 && y == cave.floor {
-				img.Set(x, y, colors['#'])
-			} else {
-				img.Set(x, y, color.White)
-			}
-		}
-	}
-	f, _ := os.Create(frameFile)
-	png.Encode(f, img)
-	f.Close()
-}
-
-func dropSand(cave *cave, p point, frameDir string) int {
+func dropSand(cave *cave, p point, r *recorder, record bool) int {
 	drops := 0
 	i := 0
-	frame := 0
+	touchingFloor := false
 	for {
 		// drop particle
 		pos := p
 		for {
 			i++
-			if len(frameDir) > 0 && i > 10000 {
-				frame++
-				i = 0
+			if record {
 				cave.grid[pos] = 'o'
-				drawFrame(cave, frameDir, frame)
+				r.AddFrame(*cave, i, touchingFloor)
 				delete(cave.grid, pos)
 			}
 			// return if falling into void
@@ -137,14 +106,8 @@ func dropSand(cave *cave, p point, frameDir string) int {
 			}
 			// stop at floor
 			if cave.floor != 0 && pos.y == cave.floor-1 {
-				drops++
-				cave.grid[pos] = 'o'
-				if pos.x < cave.min.x {
-					cave.min.x = pos.x
-				} else if pos.x > cave.max.x {
-					cave.max.x = pos.x
-				}
-				break
+				touchingFloor = true
+				goto stop
 			}
 			// normal drop
 			if _, ok := cave.grid[point{pos.x, pos.y + 1}]; !ok {
@@ -159,14 +122,21 @@ func dropSand(cave *cave, p point, frameDir string) int {
 				pos.y++
 				pos.x++
 			} else {
-				// stop
-				drops++
-				cave.grid[pos] = 'o'
-				if pos == p {
-					return drops
-				}
-				break
+				goto stop
 			}
+			continue
+		stop:
+			drops++
+			cave.grid[pos] = 'o'
+			if pos.x < cave.min.x {
+				cave.min.x = pos.x
+			} else if pos.x > cave.max.x {
+				cave.max.x = pos.x
+			}
+			if pos == p {
+				return drops
+			}
+			break
 		}
 	}
 }
@@ -183,7 +153,7 @@ func Solve(test bool) (string, string, time.Duration) {
 	}
 
 	// Task 1
-	maxDrops := dropSand(&cave, point{500, 0}, "")
+	maxDrops := dropSand(&cave, point{500, 0}, &recorder{}, false)
 	if test {
 		fmt.Println(cave)
 	}
@@ -204,7 +174,9 @@ func Solve(test bool) (string, string, time.Duration) {
 		fmt.Println(cave)
 	}
 	// drop sand
-	maxDrops = dropSand(&cave, point{500, 0}, "day14/frames")
+	r := NewRecorder("day14/frames", cave.min.y, cave.max.y, cave.floor)
+	maxDrops = dropSand(&cave, point{500, 0}, r, test)
+	r.DrawFrames()
 	if test {
 		fmt.Println(cave)
 	}
@@ -212,4 +184,69 @@ func Solve(test bool) (string, string, time.Duration) {
 	res2 := strconv.Itoa(maxDrops)
 
 	return res1, res2, time.Since(start)
+}
+
+type recorder struct {
+	frameDir string
+	frames   []map[point]byte
+	minx     int
+	maxx     int
+	miny     int
+	maxy     int
+	floor    int
+}
+
+func NewRecorder(frameDir string, miny, maxy, floor int) *recorder {
+	return &recorder{
+		frameDir: frameDir,
+		frames:   make([]map[point]byte, 0),
+		minx:     500,
+		maxx:     500,
+		miny:     miny,
+		maxy:     maxy,
+		floor:    floor,
+	}
+}
+
+func (r *recorder) AddFrame(cave cave, i int, touchingFloor bool) {
+	if touchingFloor && i%100 != 0 {
+		return
+	}
+	frame := make(map[point]byte)
+	for k, v := range cave.grid {
+		frame[k] = v
+	}
+	r.frames = append(r.frames, frame)
+	if cave.min.x < r.minx {
+		r.minx = cave.min.x
+	}
+	if cave.max.x > r.maxx {
+		r.maxx = cave.max.x
+	}
+}
+
+func (r recorder) DrawFrames() {
+	colors := map[byte]color.Color{
+		'#': color.RGBA{0, 0, 0, 255},
+		'o': color.RGBA{255, 255, 0, 255},
+	}
+
+	for i, frame := range r.frames {
+		frameFile := fmt.Sprintf("%s/frame%05d.png", r.frameDir, i)
+		img := image.NewRGBA(image.Rect(r.minx-1, r.miny, r.maxx+1, r.maxy))
+		for x := r.minx - 1; x <= r.maxx+1; x++ {
+			for y := r.miny; y <= r.maxy; y++ {
+				if v, ok := frame[point{x, y}]; ok {
+					img.Set(x, y, colors[v])
+				} else if r.floor != 0 && y == r.floor {
+					img.Set(x, y, colors['#'])
+				} else {
+					img.Set(x, y, color.White)
+				}
+			}
+		}
+		f, _ := os.Create(frameFile)
+		png.Encode(f, img)
+		f.Close()
+	}
 }
