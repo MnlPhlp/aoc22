@@ -21,6 +21,7 @@ import (
 	"gitlab.com/mnlphlp/aoc22/day12"
 	"gitlab.com/mnlphlp/aoc22/day13"
 	"gitlab.com/mnlphlp/aoc22/day14"
+	"gitlab.com/mnlphlp/aoc22/day15"
 )
 
 func notImplemented(day int) func(bool) (string, string, time.Duration) {
@@ -46,7 +47,7 @@ var dayFuncs = [...]func(bool) (string, string, time.Duration){
 	day12.Solve,
 	day13.Solve,
 	day14.Solve,
-	notImplemented(15),
+	day15.Solve,
 	notImplemented(16),
 	notImplemented(17),
 	notImplemented(18),
@@ -98,6 +99,9 @@ func main() {
 	}
 	overall := float32(time.Since(start).Microseconds()) / 1000
 
+	if len(days) == 1 {
+		return
+	}
 	fmt.Println("\n\n###########\n# Results #\n###########")
 	for i, day := range days {
 		fmt.Printf("day %2d:  %-15s  %-15s  (%6.2f ms / %5.2f %%)\n", day, results1[i], results2[i], times[i], times[i]/overall*100)
