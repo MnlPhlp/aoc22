@@ -11,6 +11,9 @@ import (
 	"gitlab.com/mnlphlp/aoc22/day02"
 	"gitlab.com/mnlphlp/aoc22/day03"
 	"gitlab.com/mnlphlp/aoc22/day04"
+	"gitlab.com/mnlphlp/aoc22/day05"
+	"gitlab.com/mnlphlp/aoc22/day06"
+	"gitlab.com/mnlphlp/aoc22/day07"
 	"gitlab.com/mnlphlp/aoc22/day08"
 	"gitlab.com/mnlphlp/aoc22/day09"
 	"gitlab.com/mnlphlp/aoc22/day10"
@@ -33,9 +36,9 @@ var dayFuncs = [...]func(bool) (string, string, time.Duration){
 	day02.Solve,
 	day03.Solve,
 	day04.Solve,
-	notImplemented(5),
-	notImplemented(6),
-	notImplemented(7),
+	day05.Solve,
+	day06.Solve,
+	day07.Solve,
 	day08.Solve,
 	day09.Solve,
 	day10.Solve,
