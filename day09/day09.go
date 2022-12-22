@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type vec2 struct {
@@ -143,8 +142,7 @@ func makeMoves(moves []move, knotCount int, test bool) map[vec2]bool {
 	return visited
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	var input []byte
 	if test {
 		input, _ = os.ReadFile("day09/testInput.txt")
@@ -160,5 +158,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	visited = makeMoves(moves, 10, test)
 	fmt.Printf("Visited %d locations\n", len(visited))
 	res2 := strconv.Itoa(len(visited))
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

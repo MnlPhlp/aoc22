@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func handleErr[T any](val T, err error) T {
@@ -165,8 +164,7 @@ func resetGrid(grid [][]*node) {
 	}
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	startTime := time.Now()
+func Solve(test bool) (string, string) {
 	var inputFile string
 	if test {
 		inputFile = "day12/testInput.txt"
@@ -210,5 +208,5 @@ func Solve(test bool) (string, string, time.Duration) {
 
 	fmt.Println("Result Task 2: ", len(path)-1)
 	res2 := strconv.Itoa(len(path) - 1)
-	return res1, res2, time.Since(startTime)
+	return res1, res2
 }

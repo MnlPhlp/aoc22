@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 )
 
 func findDuplicate(r string) byte {
@@ -52,8 +51,7 @@ func findBadges(rucksacks []string) []byte {
 	return badges
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	input, _ := os.ReadFile("day03/input.txt")
 	rucksacks := strings.Split(string(input), "\n")
 	// remove empty line
@@ -76,5 +74,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	fmt.Println()
 	fmt.Println("Result 2:", badgeSum)
 	res2 := fmt.Sprint(badgeSum)
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

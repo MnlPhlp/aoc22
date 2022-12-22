@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type pair struct {
@@ -159,8 +158,7 @@ func checkOrder(pairs []pair) []bool {
 	return orders
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	inputFile := "day13/input.txt"
 	if test {
 		inputFile = "day13/testInput.txt"
@@ -206,5 +204,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	fmt.Println("Key 2: ", key2)
 	fmt.Println("result task 2: ", key1*key2)
 	res2 := strconv.Itoa(key1 * key2)
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

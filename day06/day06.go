@@ -3,7 +3,6 @@ package day06
 import (
 	"fmt"
 	"os"
-	"time"
 )
 
 func hasDuplicates(input []byte) bool {
@@ -28,8 +27,7 @@ func getIndex(input []byte, count int) int {
 	return -1
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	inputFile := "day06/input.txt"
 	input, _ := os.ReadFile(inputFile)
 
@@ -43,5 +41,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	fmt.Println("Index for count 14: ", idx2)
 	res2 := fmt.Sprintf("%d", idx2)
 
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

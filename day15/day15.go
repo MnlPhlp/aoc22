@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 )
 
 type point struct {
@@ -124,9 +123,7 @@ func findFreeSpot(g grid, min, max int) point {
 	return point{0, 0}
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
-
+func Solve(test bool) (string, string) {
 	// parse Input
 	inputFile := "day15/input.txt"
 	line := 2000000
@@ -152,5 +149,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	fmt.Printf("Free spot: %v\n", freeSpot)
 	fmt.Println("Task 2:", res2)
 
-	return re1, res2, time.Since(start)
+	return re1, res2
 }

@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func parseInput() [][]int {
@@ -98,16 +97,12 @@ func countVisible(grid [][]int) (int, int, [2]int) {
 	return visible, maxScenic, scenicPos
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	// read input into 2d array
 	grid := parseInput()
-	parse := time.Since(start)
 	// count visible trees
 	visible, mostScenic, scenicPos := countVisible(grid)
-	count := time.Since(start) - parse
-	println(visible)
-	println(mostScenic, " at ", scenicPos[0], ",", scenicPos[1])
-	fmt.Printf("Parse: %v\nCalc: %v\n", parse, count)
-	return strconv.Itoa(visible), strconv.Itoa(mostScenic), time.Since(start)
+	fmt.Println("Task 1: ", visible)
+	fmt.Println("Task 2: ", mostScenic, " at ", scenicPos[0], ",", scenicPos[1])
+	return strconv.Itoa(visible), strconv.Itoa(mostScenic)
 }

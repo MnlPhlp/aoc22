@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type secRange struct {
@@ -40,8 +39,7 @@ func parseInput() []pair {
 	return pairs
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	pairs := parseInput()
 
 	count := 0
@@ -61,5 +59,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	}
 	fmt.Printf("overlapping pairs: %v\n", count)
 	res2 := strconv.Itoa(count)
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

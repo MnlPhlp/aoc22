@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 )
 
 const (
@@ -67,8 +66,7 @@ func calcScore2(line string) int {
 	return score
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	input, _ := os.ReadFile("day02/input.txt")
 	lines := strings.Split(string(input), "\n")
 	score := 0
@@ -90,5 +88,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	}
 	fmt.Printf("Score 2: %v\n", score)
 	res2 := fmt.Sprintf("%d", score)
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

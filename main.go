@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -24,15 +25,14 @@ import (
 	"gitlab.com/mnlphlp/aoc22/day15"
 )
 
-func notImplemented(day int) func(bool) (string, string, time.Duration) {
-	return func(b bool) (string, string, time.Duration) {
-		start := time.Now()
+func notImplemented(day int) func(bool) (string, string) {
+	return func(b bool) (string, string) {
 		fmt.Printf("day %v is not implemented in go\n", day)
-		return "       not", "done in go", time.Since(start)
+		return "not", "implemented"
 	}
 }
 
-var dayFuncs = [...]func(bool) (string, string, time.Duration){
+var dayFuncs = [...]func(bool) (string, string){
 	day01.Solve,
 	day02.Solve,
 	day03.Solve,
@@ -63,6 +63,7 @@ func main() {
 	dayStr := flag.String("d", "", "day")
 	daysString := flag.String("days", "", "days")
 	test := flag.Bool("t", false, "test")
+	updateReadme := flag.Bool("readme", false, "updateReadme")
 	flag.Parse()
 	*dayStr = strings.Trim(*dayStr, "day.go")
 	day, _ := strconv.Atoi(*dayStr)
@@ -92,20 +93,39 @@ func main() {
 	start := time.Now()
 	for _, day := range days {
 		fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
-		res1, res2, time := dayFuncs[day-1](*test)
+		start := time.Now()
+		res1, res2 := dayFuncs[day-1](*test)
+		times = append(times, float32(time.Since(start).Microseconds())/1000)
 		results1 = append(results1, res1)
 		results2 = append(results2, res2)
-		times = append(times, float32(time.Microseconds())/1000)
 	}
 	overall := float32(time.Since(start).Microseconds()) / 1000
 
 	if len(days) == 1 {
 		return
 	}
-	fmt.Println("\n\n###########\n# Results #\n###########")
-	for i, day := range days {
-		fmt.Printf("day %2d:  %-15s  %-15s  (%6.2f ms / %5.2f %%)\n", day, results1[i], results2[i], times[i], times[i]/overall*100)
-	}
-	fmt.Printf("Overall Time: %.2f s\n", overall/1000)
 
+	results := "## Results:\n"
+	results += "day | result 1        | result 2        | time (ms) | % of overall time\n"
+	results += "--: | :-------------: | :--------------:| --------: | :--------\n"
+	for i, day := range days {
+		results += fmt.Sprintf("%3d | %-15s | %-15s | %9.2f | %5.2f %%\n", day, results1[i], results2[i], times[i], times[i]/overall*100)
+	}
+	results += fmt.Sprintf("\nOverall Time: %.2f s\n", overall/1000)
+	if *updateReadme {
+		content, _ := os.ReadFile("README.md")
+		startIndex := strings.Index(string(content), "## Results:\n")
+		endIndex := strings.Index(string(content), "Overall Time:")
+		start := []byte{}
+		if startIndex >= 0 {
+			start = content[:startIndex]
+		}
+		end := []byte{}
+		if endIndex >= 0 {
+			endIndex += strings.Index(string(content[endIndex:]), "\n")
+			end = content[endIndex:]
+		}
+		os.WriteFile("README.md", append(start, append([]byte(results), end...)...), 0644)
+	}
+	fmt.Printf("\n%s", results)
 }

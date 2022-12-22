@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func parseDirs(inputFile string) map[string]int {
@@ -41,9 +40,7 @@ func parseDirs(inputFile string) map[string]int {
 	return dirs
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
-
+func Solve(test bool) (string, string) {
 	inputFile := "day07/input.txt"
 	if test {
 		inputFile = "day07/testInput.txt"
@@ -77,5 +74,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	fmt.Println("smallest dir to delete: ", smallestDir, minSize)
 	res2 := fmt.Sprintf("%d", minSize)
 
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

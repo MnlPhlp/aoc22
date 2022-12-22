@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func parseStacks(input []byte) [][]byte {
@@ -84,8 +83,7 @@ func doMoves(stacks [][]byte, instructions [][3]int, moveAtOnce bool) {
 	}
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	inputFile := "day05/input.txt"
 	stacks, instructions := parseInput(inputFile)
 	stacks2 := make([][]byte, len(stacks))
@@ -114,5 +112,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	}
 	fmt.Println("Task 1: ", res1)
 
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

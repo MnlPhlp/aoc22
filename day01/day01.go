@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func sumCalories(elfes []string) []int {
@@ -23,8 +22,7 @@ func sumCalories(elfes []string) []int {
 	return calories
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	res1 := ""
 	res2 := ""
 
@@ -42,5 +40,5 @@ func Solve(test bool) (string, string, time.Duration) {
 	fmt.Printf("Top calories: %d\n", topCalories)
 	res2 = fmt.Sprintf("%d", topCalories)
 
-	return res1, res2, time.Since(start)
+	return res1, res2
 }

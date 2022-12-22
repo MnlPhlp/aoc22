@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type instruction struct {
@@ -33,8 +32,7 @@ func parseInput(inputFile string) []instruction {
 	return instructions
 }
 
-func Solve(test bool) (string, string, time.Duration) {
-	start := time.Now()
+func Solve(test bool) (string, string) {
 	inputFile := "day10/input.txt"
 	if test {
 		inputFile = "day10/testInput.txt"
@@ -87,5 +85,5 @@ func Solve(test bool) (string, string, time.Duration) {
 		res2 += "\n"
 	}
 	fmt.Printf("Screen:\n%s", res2)
-	return res1, "<img>", time.Since(start)
+	return res1, "too long"
 }
