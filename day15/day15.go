@@ -98,8 +98,8 @@ func findFreeSpot(g grid, min, max int) point {
 			for _, s := range g.sensors {
 				dist := manhattanDistance(p, s.point)
 				if dist <= s.distToBeacon {
-					// move to next free spot
-					distOnLine := s.distToBeacon - dist
+					// move to next spot not covered by this sensor
+					distOnLine := s.distToBeacon - manhattanDistance(s.point, point{s.x, y})
 					if x-distOnLine < min && x+distOnLine > max {
 						// move to next not completely covered line
 						if s.x < max/2 {
@@ -113,7 +113,7 @@ func findFreeSpot(g grid, min, max int) point {
 						}
 
 					} else {
-						x += distOnLine
+						x = s.x + distOnLine
 					}
 					continue point
 				}
