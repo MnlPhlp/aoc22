@@ -117,7 +117,9 @@ func findMaxPressure(valves map[string]valve, time int, startPoint string) valve
 					val.inPath |= current.id
 				}
 				val.calc(time, current)
-				if val.timeToOpen < time && !val.IsInSlice(open) {
+				if val.f+(maxFlow-val.curFlow)*(time-val.timeToOpen) < bestGoal.f {
+					continue
+				} else if val.timeToOpen < time && !val.IsInSlice(open) {
 					open = append(open, val)
 				}
 			}
