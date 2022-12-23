@@ -8,41 +8,39 @@ import (
 )
 
 type valve struct {
-	name        string
 	flow        int
-	g           int
 	f           int
+	timeToOpen  int
 	open        bool
-	connections []*valve
-	parent      *valve
+	connections []string
+	id          int
+	inPath      int
 }
 
-func (v *valve) calc(time int) {
-	if v.parent != nil {
-		v.g = v.parent.g + 1
-	}
-	v.f = v.flow * (time - v.g)
+func (v *valve) calc(time int, current valve) {
+	v.timeToOpen = current.timeToOpen + 1
+	v.f = current.f + v.flow*(time-v.timeToOpen)
 }
 
 func (v valve) String() string {
-	connections := ""
-	if len(v.connections) > 0 {
-		for _, c := range v.connections {
-			connections += c.name + ", "
-		}
-		if len(connections) > 2 {
-			connections = connections[:len(connections)-2]
-		}
-	}
-	return fmt.Sprintf("Valve: %s, Flow: %d, Connections to: %s", v.name, v.flow, connections)
+	return fmt.Sprintf("Valve: %d, Flow: %d, Connections to: %v", v.id, v.flow, v.connections)
 }
 
-func parseValves(file string) (map[string]*valve, string) {
-	valves := make(map[string]*valve)
+func (v *valve) IsInSlice(slice []valve) bool {
+	for _, s := range slice {
+		if s.id == v.id && s.open == v.open && s.f == v.f {
+			return true
+		}
+	}
+	return false
+}
+
+func parseValves(file string) (map[string]valve, string) {
+	valves := make(map[string]valve)
 	connections := make(map[string]string)
 	input, _ := os.ReadFile(file)
 	start := string(input[6:8])
-	for _, l := range strings.Split(string(input), "\n") {
+	for i, l := range strings.Split(string(input), "\n") {
 		if l == "" {
 			continue
 		}
@@ -52,40 +50,47 @@ func parseValves(file string) (map[string]*valve, string) {
 			connection += p
 		}
 		flow, _ := strconv.Atoi(parts[4][5 : len(parts[4])-1])
-		valves[parts[1]+"C"] = &valve{
-			name: parts[1] + "C",
-			flow: flow,
+		id := 1 << i
+		valves[parts[1]+"C"] = valve{
+			flow: 0,
+			id:   id,
 		}
-		valves[parts[1]+"O"] = &valve{
-			name: parts[1] + "O",
+		valves[parts[1]+"O"] = valve{
 			flow: flow,
 			open: true,
+			id:   id,
 		}
 		connections[parts[1]+"O"] = connection
 		connections[parts[1]+"C"] = connection
 	}
 	for name, connection := range connections {
+		val := valves[name]
 		for _, c := range strings.Split(connection, ",") {
-			valves[name].connections = append(valves[name].connections, valves[c+"O"], valves[c+"C"])
+			val.connections = append(val.connections, c+"C")
 		}
 		if !valves[name].open {
-			valves[name].connections = append(valves[name].connections, valves[name[:len(name)-1]+"O"])
+			val.connections = append(val.connections, name[:len(name)-1]+"O")
 		}
+		valves[name] = val
 	}
 	return valves, start
 }
 
-func findMaxPressure(valves map[string]*valve, time int, startPoint string) int {
-	pressure := 0
-	closed := make(map[string]bool)
-	open := make([]*valve, 0)
+func findMaxPressure(valves map[string]valve, time int, startPoint string) valve {
+	open := make([]valve, 0)
 	// start with closed version of first valve
 	current := valves[startPoint+"C"]
-	current.calc(time)
+	current.calc(time, valve{})
 	open = append(open, current)
+	bestGoal := current
+	maxFlow := 0
+	for _, v := range valves {
+		maxFlow += v.flow
+	}
 
 	// explore paths using a* like algorithm
 	for len(open) > 0 {
+		// choose best item of open list
 		maxScore := 0
 		for i, v := range open {
 			if v.f > open[maxScore].f {
@@ -94,18 +99,30 @@ func findMaxPressure(valves map[string]*valve, time int, startPoint string) int 
 		}
 		current = open[maxScore]
 		open = append(open[:maxScore], open[maxScore+1:]...)
-		closed[current.name] = true
 
-	}
-
-	// find valve with best f
-	for _, v := range valves {
-		if v.f > pressure {
-			pressure = v.f
+		// skip item if max score is not reachable even with all valves open
+		if current.f+maxFlow*(time-current.timeToOpen) < bestGoal.f {
+			continue
+		} else if current.f > bestGoal.f {
+			bestGoal = current
 		}
-	}
 
-	return pressure
+		for _, v := range current.connections {
+			val := valves[v]
+			if !val.open || current.inPath&val.id == 0 {
+				val.inPath = current.inPath
+				if current.open {
+					val.inPath |= current.id
+				}
+				val.calc(time, current)
+				if val.timeToOpen < time && !val.IsInSlice(open) {
+					open = append(open, val)
+				}
+			}
+		}
+
+	}
+	return bestGoal
 }
 
 func Solve(test bool) (string, string) {
@@ -123,7 +140,8 @@ func Solve(test bool) (string, string) {
 
 	// Task 1
 	maxPressure := findMaxPressure(valves, 30, startValve)
-	ret1 := strconv.Itoa(maxPressure)
+	fmt.Println("Max Pressure", maxPressure.f)
+	ret1 := strconv.Itoa(maxPressure.f)
 
 	return ret1, "implemented"
 }
