@@ -15,11 +15,13 @@ type valve struct {
 	connections []string
 	id          int
 	inPath      int
+	curFlow     int
 }
 
 func (v *valve) calc(time int, current valve) {
 	v.timeToOpen = current.timeToOpen + 1
 	v.f = current.f + v.flow*(time-v.timeToOpen)
+	v.curFlow = current.curFlow + v.flow
 }
 
 func (v valve) String() string {
@@ -101,7 +103,7 @@ func findMaxPressure(valves map[string]valve, time int, startPoint string) valve
 		open = append(open[:maxScore], open[maxScore+1:]...)
 
 		// skip item if max score is not reachable even with all valves open
-		if current.f+maxFlow*(time-current.timeToOpen) < bestGoal.f {
+		if current.f+(maxFlow-current.curFlow)*(time-current.timeToOpen) < bestGoal.f {
 			continue
 		} else if current.f > bestGoal.f {
 			bestGoal = current
