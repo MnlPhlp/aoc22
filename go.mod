@@ -1,4 +1,4 @@
-module gitlab.com/mnlphlp/aoc22
+module github.com/mnlphlp/aoc22
 
 go 1.19
 

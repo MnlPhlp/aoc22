@@ -8,22 +8,23 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/mnlphlp/aoc22/day01"
-	"gitlab.com/mnlphlp/aoc22/day02"
-	"gitlab.com/mnlphlp/aoc22/day03"
-	"gitlab.com/mnlphlp/aoc22/day04"
-	"gitlab.com/mnlphlp/aoc22/day05"
-	"gitlab.com/mnlphlp/aoc22/day06"
-	"gitlab.com/mnlphlp/aoc22/day07"
-	"gitlab.com/mnlphlp/aoc22/day08"
-	"gitlab.com/mnlphlp/aoc22/day09"
-	"gitlab.com/mnlphlp/aoc22/day10"
-	"gitlab.com/mnlphlp/aoc22/day11"
-	"gitlab.com/mnlphlp/aoc22/day12"
-	"gitlab.com/mnlphlp/aoc22/day13"
-	"gitlab.com/mnlphlp/aoc22/day14"
-	"gitlab.com/mnlphlp/aoc22/day15"
-	"gitlab.com/mnlphlp/aoc22/day16"
+	"github.com/mnlphlp/aoc22/day01"
+	"github.com/mnlphlp/aoc22/day02"
+	"github.com/mnlphlp/aoc22/day03"
+	"github.com/mnlphlp/aoc22/day04"
+	"github.com/mnlphlp/aoc22/day05"
+	"github.com/mnlphlp/aoc22/day06"
+	"github.com/mnlphlp/aoc22/day07"
+	"github.com/mnlphlp/aoc22/day08"
+	"github.com/mnlphlp/aoc22/day09"
+	"github.com/mnlphlp/aoc22/day10"
+	"github.com/mnlphlp/aoc22/day11"
+	"github.com/mnlphlp/aoc22/day12"
+	"github.com/mnlphlp/aoc22/day13"
+	"github.com/mnlphlp/aoc22/day14"
+	"github.com/mnlphlp/aoc22/day15"
+	"github.com/mnlphlp/aoc22/day16"
+	"github.com/mnlphlp/aoc22/day17"
 )
 
 func notImplemented(day int) func(bool, int) (string, string) {
@@ -56,7 +57,7 @@ var dayFuncs = [...]func(bool, int) (string, string){
 	wrap(day14.Solve),
 	wrap(day15.Solve),
 	day16.Solve,
-	notImplemented(17),
+	day17.Solve,
 	notImplemented(18),
 	notImplemented(19),
 	notImplemented(20),
@@ -94,18 +95,18 @@ func main() {
 
 	fmt.Printf("calculating days: %v \n", days)
 
-	results1 := make([]string, 0, len(days))
-	results2 := make([]string, 0, len(days))
-	times := make([]float32, 0, len(days))
+	results1 := make([]string, len(days))
+	results2 := make([]string, len(days))
+	times := make([]float32, len(days))
 
 	start := time.Now()
-	for _, day := range days {
+	for i, day := range days {
 		fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
 		start := time.Now()
 		res1, res2 := dayFuncs[day-1](*test, *task)
-		times = append(times, float32(time.Since(start).Microseconds())/1000)
-		results1 = append(results1, res1)
-		results2 = append(results2, res2)
+		times[i] = float32(time.Since(start).Microseconds()) / 1000
+		results1[i] = res1
+		results2[i] = res2
 	}
 	overall := float32(time.Since(start).Microseconds()) / 1000
 
