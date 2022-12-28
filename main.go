@@ -26,29 +26,35 @@ import (
 	"gitlab.com/mnlphlp/aoc22/day16"
 )
 
-func notImplemented(day int) func(bool) (string, string) {
-	return func(b bool) (string, string) {
+func notImplemented(day int) func(bool, int) (string, string) {
+	return func(b bool, i int) (string, string) {
 		fmt.Printf("day %v is not implemented in go\n", day)
 		return "not", "implemented"
 	}
 }
 
-var dayFuncs = [...]func(bool) (string, string){
-	day01.Solve,
-	day02.Solve,
-	day03.Solve,
-	day04.Solve,
-	day05.Solve,
-	day06.Solve,
-	day07.Solve,
-	day08.Solve,
-	day09.Solve,
-	day10.Solve,
-	day11.Solve,
-	day12.Solve,
-	day13.Solve,
-	day14.Solve,
-	day15.Solve,
+func wrap(f func(bool) (string, string)) func(bool, int) (string, string) {
+	return func(b bool, i int) (string, string) {
+		return f(b)
+	}
+}
+
+var dayFuncs = [...]func(bool, int) (string, string){
+	wrap(day01.Solve),
+	wrap(day02.Solve),
+	wrap(day03.Solve),
+	wrap(day04.Solve),
+	wrap(day05.Solve),
+	wrap(day06.Solve),
+	wrap(day07.Solve),
+	wrap(day08.Solve),
+	wrap(day09.Solve),
+	wrap(day10.Solve),
+	wrap(day11.Solve),
+	wrap(day12.Solve),
+	wrap(day13.Solve),
+	wrap(day14.Solve),
+	wrap(day15.Solve),
 	day16.Solve,
 	notImplemented(17),
 	notImplemented(18),
@@ -64,6 +70,7 @@ func main() {
 	dayStr := flag.String("d", "", "day")
 	daysString := flag.String("days", "", "days")
 	test := flag.Bool("t", false, "test")
+	task := flag.Int("task", 0, "task (0=both, 1=task1, 2=task2)")
 	updateReadme := flag.Bool("readme", false, "updateReadme")
 	flag.Parse()
 	*dayStr = strings.Trim(*dayStr, "day.go")
@@ -95,7 +102,7 @@ func main() {
 	for _, day := range days {
 		fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
 		start := time.Now()
-		res1, res2 := dayFuncs[day-1](*test)
+		res1, res2 := dayFuncs[day-1](*test, *task)
 		times = append(times, float32(time.Since(start).Microseconds())/1000)
 		results1 = append(results1, res1)
 		results2 = append(results2, res2)
