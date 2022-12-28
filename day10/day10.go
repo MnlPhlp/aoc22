@@ -77,9 +77,9 @@ func Solve(test bool) (string, string) {
 	for _, row := range screen {
 		for _, pixel := range row {
 			if pixel {
-				res2 += "##"
+				res2 += "██"
 			} else {
-				res2 += ".."
+				res2 += "░░"
 			}
 		}
 		res2 += "\n"
