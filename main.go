@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/mnlphlp/aoc22/day01"
@@ -75,12 +76,23 @@ func capLength(str string, length int) string {
 	return str
 }
 
+func calcDay(day int, i int, results1 []string, results2 []string, times []time.Duration, test bool, task int) {
+	fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
+	start := time.Now()
+	input := util.ReadInput(day, test)
+	res1, res2 := dayFuncs[day-1](input, test, task)
+	times[i] = time.Since(start)
+	results1[i] = res1
+	results2[i] = res2
+}
+
 func main() {
 	dayStr := flag.String("d", "", "day")
 	daysString := flag.String("days", "", "days")
 	test := flag.Bool("t", false, "test")
 	task := flag.Int("task", 0, "task (0=both, 1=task1, 2=task2)")
 	updateReadme := flag.Bool("readme", false, "updateReadme")
+	parallel := flag.Bool("p", false, "parallel")
 	flag.Parse()
 	*dayStr = strings.Trim(*dayStr, "day.go")
 	day, _ := strconv.Atoi(*dayStr)
@@ -105,27 +117,39 @@ func main() {
 
 	results1 := make([]string, len(days))
 	results2 := make([]string, len(days))
-	times := make([]float32, len(days))
+	times := make([]time.Duration, len(days))
 
 	start := time.Now()
-	for i, day := range days {
-		fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
-		start := time.Now()
-		input := util.ReadInput(day, *test)
-		res1, res2 := dayFuncs[day-1](input, *test, *task)
-		times[i] = float32(time.Since(start).Microseconds()) / 1000
-		results1[i] = res1
-		results2[i] = res2
+	if *parallel {
+		wg := sync.WaitGroup{}
+		for i, day := range days {
+			wg.Add(1)
+			go func(i int, day int) {
+				defer wg.Done()
+				calcDay(day, i, results1, results2, times, *test, *task)
+			}(i, day)
+		}
+		wg.Wait()
+	} else {
+		for i, day := range days {
+			calcDay(day, i, results1, results2, times, *test, *task)
+		}
 	}
-	overall := float32(time.Since(start).Microseconds()) / 1000
+	overall := time.Since(start)
 
 	results := "## Results:\n"
 	results += "day | result 1        | result 2        | time (ms) | % of overall time\n"
 	results += "--: | :-------------: | :--------------:| --------: | :--------\n"
 	for i, day := range days {
-		results += fmt.Sprintf("%3d | %-15s | %-15s | %9.2f | %5.2f %%\n", day, capLength(results1[i], 15), capLength(results2[i], 15), times[i], times[i]/overall*100)
+		results += fmt.Sprintf("%3d | %-15s | %-15s | %9.2f | %5.2f %%\n",
+			day,
+			capLength(results1[i], 15),
+			capLength(results2[i], 15),
+			float32(times[i].Microseconds())/1000,
+			float32(times[i].Microseconds())/float32(overall.Microseconds())*100)
 	}
-	results += fmt.Sprintf("\nOverall Time: %.2f s\n", overall/1000)
+	results += fmt.Sprintf("\nOverall Time: %v\n", overall)
+	results += fmt.Sprintf("Summed Time: %v\n", util.Sum(times))
 	if *updateReadme {
 		content, _ := os.ReadFile("README.md")
 		startIndex := strings.Index(string(content), "## Results:\n")

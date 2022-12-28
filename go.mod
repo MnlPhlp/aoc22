@@ -2,7 +2,10 @@ module github.com/mnlphlp/aoc22
 
 go 1.19
 
-require github.com/stretchr/testify v1.8.1
+require (
+	github.com/stretchr/testify v1.8.1
+	golang.org/x/exp v0.0.0-20221227203929-1b447090c38c
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

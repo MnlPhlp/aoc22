@@ -69,11 +69,9 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 	for x := 0; x < 7; x++ {
 		filled[util.Pos{x, 0}] = true
 	}
-	lastPercent := 0
 	for i := 0; i < drops; i++ {
-		if i*1000/drops > lastPercent {
-			lastPercent = i * 1000 / drops
-			fmt.Printf("%f%% done. Filled size %d\n", float64(lastPercent)/10, len(filled))
+		if i%10000 == 0 {
+			fmt.Printf("%f%% done. Filled size %d\n", float64(i*1000/drops)/10, len(filled))
 		}
 		// place new rock
 		rockType = (rockType + 1) % len(rocks)
@@ -156,9 +154,7 @@ func Solve(inputStr string, test bool, task int) (string, string) {
 			fmt.Println()
 		}
 	}
-	fmt.Println("Moves:")
 	res1, res2 := "", ""
-	fmt.Println(input)
 	if task != 2 {
 		res1 = simulateDrops(input, test, 2022)
 		fmt.Println("Result 1: ", res1)

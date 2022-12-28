@@ -5,6 +5,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+
+	"golang.org/x/exp/constraints"
 )
 
 func ReadInput(day int, test bool) string {
@@ -17,4 +19,12 @@ func ReadInput(day int, test bool) string {
 		return strings.ReplaceAll(string(input), "\r\n", "\n")
 	}
 	return string(input)
+}
+
+func Sum[T constraints.Ordered](arr []T) T {
+	var sum T
+	for _, v := range arr {
+		sum += v
+	}
+	return sum
 }
