@@ -2,7 +2,6 @@ package day13
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -88,9 +87,8 @@ func parseItem(line string) item {
 	return item
 }
 
-func parseInput(inputFile string) []pair {
+func parseInput(input string) []pair {
 	pairs := make([]pair, 0)
-	input, _ := os.ReadFile(inputFile)
 	for _, part := range strings.Split(string(input), "\n\n") {
 		if len(part) == 0 {
 			continue
@@ -112,10 +110,9 @@ func parseInput(inputFile string) []pair {
 	return pairs
 }
 
-func parse2(inputFile string) []item {
+func parse2(input string) []item {
 	items := make([]item, 0)
-	input, _ := os.ReadFile(inputFile)
-	for _, line := range strings.Split(string(input), "\n") {
+	for _, line := range strings.Split(input, "\n") {
 		if len(line) == 0 {
 			continue
 		}
@@ -158,51 +155,51 @@ func checkOrder(pairs []pair) []bool {
 	return orders
 }
 
-func Solve(test bool) (string, string) {
-	inputFile := "day13/input.txt"
-	if test {
-		inputFile = "day13/testInput.txt"
-	}
-	pairs := parseInput(inputFile)
+func Solve(input string, test bool, task int) (string, string) {
+	pairs := parseInput(input)
+	res1, res2 := "", ""
 
 	if test {
 		fmt.Println(pairs)
 	}
-	orders := checkOrder(pairs)
-	result := 0
-	for i, order := range orders {
-		if order {
-			fmt.Print(i+1, ";")
-			result += i + 1
+	if task != 2 {
+		orders := checkOrder(pairs)
+		result := 0
+		for i, order := range orders {
+			if order {
+				fmt.Print(i+1, ";")
+				result += i + 1
+			}
 		}
+		fmt.Println()
+		fmt.Println("result task 1: ", result)
+		res1 = strconv.Itoa(result)
 	}
-	fmt.Println()
-	fmt.Println("result task 1: ", result)
-	res1 := strconv.Itoa(result)
-	checkPair(pairs[7])
 
-	// task 2
-	items := parse2(inputFile)
-	items = append(items, parseItem("[[2]]"))
-	items = append(items, parseItem("[[6]]"))
+	if task != 1 {
+		// task 2
+		items := parse2(input)
+		items = append(items, parseItem("[[2]]"))
+		items = append(items, parseItem("[[6]]"))
 
-	sort.Slice(items, func(i, j int) bool {
-		ok, _ := checkPair(pair{left: items[i], right: items[j]})
-		return ok
-	})
+		sort.Slice(items, func(i, j int) bool {
+			ok, _ := checkPair(pair{left: items[i], right: items[j]})
+			return ok
+		})
 
-	key1, key2 := 0, 0
-	for i, item := range items {
-		if item.String() == "[[2]]" {
-			key1 = i + 1
+		key1, key2 := 0, 0
+		for i, item := range items {
+			if item.String() == "[[2]]" {
+				key1 = i + 1
+			}
+			if item.String() == "[[6]]" {
+				key2 = i + 1
+			}
 		}
-		if item.String() == "[[6]]" {
-			key2 = i + 1
-		}
+		fmt.Println("Key 1: ", key1)
+		fmt.Println("Key 2: ", key2)
+		fmt.Println("result task 2: ", key1*key2)
+		res2 = strconv.Itoa(key1 * key2)
 	}
-	fmt.Println("Key 1: ", key1)
-	fmt.Println("Key 2: ", key2)
-	fmt.Println("result task 2: ", key1*key2)
-	res2 := strconv.Itoa(key1 * key2)
 	return res1, res2
 }

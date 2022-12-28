@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/mnlphlp/aoc22/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +13,8 @@ var res1, res2 string
 func solve() {
 	if res1 == "" {
 		os.Chdir("..")
-		res1, res2 = Solve(false, 0)
+		input := util.ReadInput(16, false)
+		res1, res2 = Solve(input, false, 0)
 	}
 }
 

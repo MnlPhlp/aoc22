@@ -2,7 +2,6 @@ package day09
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -142,21 +141,20 @@ func makeMoves(moves []move, knotCount int, test bool) map[vec2]bool {
 	return visited
 }
 
-func Solve(test bool) (string, string) {
-	var input []byte
-	if test {
-		input, _ = os.ReadFile("day09/testInput.txt")
-	} else {
-		input, _ = os.ReadFile("day09/input.txt")
-	}
+func Solve(input string, test bool, task int) (string, string) {
 	moves := parseMoves(string(input))
-	fmt.Printf("Doing %d moves with 2 knots\n", len(moves))
-	visited := makeMoves(moves, 2, test)
-	fmt.Printf("Visited %d locations\n", len(visited))
-	res1 := strconv.Itoa(len(visited))
-	fmt.Printf("Doing %d moves with 10 knots\n", len(moves))
-	visited = makeMoves(moves, 10, test)
-	fmt.Printf("Visited %d locations\n", len(visited))
-	res2 := strconv.Itoa(len(visited))
+	res1, res2 := "", ""
+	if task != 2 {
+		fmt.Printf("Doing %d moves with 2 knots\n", len(moves))
+		visited := makeMoves(moves, 2, test)
+		fmt.Printf("Visited %d locations\n", len(visited))
+		res1 = strconv.Itoa(len(visited))
+	}
+	if task != 1 {
+		fmt.Printf("Doing %d moves with 10 knots\n", len(moves))
+		visited := makeMoves(moves, 10, test)
+		fmt.Printf("Visited %d locations\n", len(visited))
+		res2 = strconv.Itoa(len(visited))
+	}
 	return res1, res2
 }

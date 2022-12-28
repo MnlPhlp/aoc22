@@ -2,7 +2,6 @@ package day04
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -22,8 +21,7 @@ func (p pair) overlap() bool {
 	return p[0].start >= p[1].start && p[0].start <= p[1].end || p[1].start >= p[0].start && p[1].start <= p[0].end
 }
 
-func parseInput() []pair {
-	input, _ := os.ReadFile("day04/input.txt")
+func parseInput(input string) []pair {
 	lines := strings.Split(string(input), "\n")
 	lines = lines[:len(lines)-1]
 	pairs := make([]pair, len(lines))
@@ -39,25 +37,29 @@ func parseInput() []pair {
 	return pairs
 }
 
-func Solve(test bool) (string, string) {
-	pairs := parseInput()
-
+func Solve(input string, test bool, task int) (string, string) {
+	pairs := parseInput(input)
+	res1, res2 := "", ""
 	count := 0
-	for _, p := range pairs {
-		if p.fullyOverlap() {
-			count++
-		}
-	}
-	fmt.Printf("fully overlapping pairs: %v\n", count)
-	res1 := strconv.Itoa(count)
 
-	count = 0
-	for _, p := range pairs {
-		if p.overlap() {
-			count++
+	if task != 2 {
+		for _, p := range pairs {
+			if p.fullyOverlap() {
+				count++
+			}
 		}
+		fmt.Printf("fully overlapping pairs: %v\n", count)
+		res1 = strconv.Itoa(count)
 	}
-	fmt.Printf("overlapping pairs: %v\n", count)
-	res2 := strconv.Itoa(count)
+	if task != 1 {
+		count = 0
+		for _, p := range pairs {
+			if p.overlap() {
+				count++
+			}
+		}
+		fmt.Printf("overlapping pairs: %v\n", count)
+		res2 = strconv.Itoa(count)
+	}
 	return res1, res2
 }

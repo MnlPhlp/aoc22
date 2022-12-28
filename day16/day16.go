@@ -2,7 +2,6 @@ package day16
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -44,10 +43,9 @@ func (v valve) String() string {
 		v.name, v.id, v.flow, v.connections, v.inPath, v.curFlow)
 }
 
-func parseValves(file string) map[string]valve {
+func parseValves(input string) map[string]valve {
 	valves := make(map[string]valve)
 	connections := make(map[string]string)
-	input, _ := os.ReadFile(file)
 	for i, l := range strings.Split(string(input), "\n") {
 		if l == "" {
 			continue
@@ -195,13 +193,9 @@ var cacheHit = 0
 var possibilityCheck = 0
 var overallPaths = 0
 
-func Solve(test bool, tasks int) (string, string) {
+func Solve(input string, test bool, tasks int) (string, string) {
 	start := time.Now()
-	inputFile := "day16/input.txt"
-	if test {
-		inputFile = "day16/testInput.txt"
-	}
-	valves := parseValves(inputFile)
+	valves := parseValves(input)
 	if test {
 		for _, v := range valves {
 			fmt.Println(v)

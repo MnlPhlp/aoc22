@@ -2,7 +2,6 @@ package day14
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -45,8 +44,7 @@ func line(a, b int) []int {
 	return res
 }
 
-func parseInput(inputFile string) cave {
-	input, _ := os.ReadFile(inputFile)
+func parseInput(input string) cave {
 	cave := cave{
 		grid: make(map[point]byte),
 		min:  point{500, 0},
@@ -128,44 +126,45 @@ func dropSand(cave *cave, p point) int {
 	}
 }
 
-func Solve(test bool) (string, string) {
-	inputFile := "day14/input.txt"
-	if test {
-		inputFile = "day14/testInput.txt"
-	}
-	cave := parseInput(inputFile)
+func Solve(input string, test bool, task int) (string, string) {
+	res1, res2 := "", ""
+	cave := parseInput(input)
 	if test {
 		fmt.Println(cave)
 	}
 
-	// Task 1
-	maxDrops := dropSand(&cave, point{500, 0})
-	if test {
-		fmt.Println(cave)
-	}
-	fmt.Printf("Task 1: %d\n", maxDrops)
-	res1 := strconv.Itoa(maxDrops)
-
-	// Task 2
-	// remove sand from cave
-	for k, v := range cave.grid {
-		if v == 'o' {
-			delete(cave.grid, k)
+	if task != 2 {
+		// Task 1
+		maxDrops := dropSand(&cave, point{500, 0})
+		if test {
+			fmt.Println(cave)
 		}
+		fmt.Printf("Task 1: %d\n", maxDrops)
+		res1 = strconv.Itoa(maxDrops)
 	}
-	// add floor to cave
-	cave.floor = cave.max.y + 2
-	cave.max.y = cave.floor
-	if test {
-		fmt.Println(cave)
+
+	if task != 1 {
+		// Task 2
+		// remove sand from cave
+		for k, v := range cave.grid {
+			if v == 'o' {
+				delete(cave.grid, k)
+			}
+		}
+		// add floor to cave
+		cave.floor = cave.max.y + 2
+		cave.max.y = cave.floor
+		if test {
+			fmt.Println(cave)
+		}
+		// drop sand
+		maxDrops := dropSand(&cave, point{500, 0})
+		if test {
+			fmt.Println(cave)
+		}
+		fmt.Printf("Task 2: %d\n", maxDrops)
+		res2 = strconv.Itoa(maxDrops)
 	}
-	// drop sand
-	maxDrops = dropSand(&cave, point{500, 0})
-	if test {
-		fmt.Println(cave)
-	}
-	fmt.Printf("Task 2: %d\n", maxDrops)
-	res2 := strconv.Itoa(maxDrops)
 
 	return res1, res2
 }

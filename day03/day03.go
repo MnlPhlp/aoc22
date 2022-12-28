@@ -2,7 +2,6 @@ package day03
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -51,28 +50,32 @@ func findBadges(rucksacks []string) []byte {
 	return badges
 }
 
-func Solve(test bool) (string, string) {
-	input, _ := os.ReadFile("day03/input.txt")
+func Solve(input string, test bool, task int) (string, string) {
 	rucksacks := strings.Split(string(input), "\n")
 	// remove empty line
 	rucksacks = rucksacks[:len(rucksacks)-1]
-	sum := 0
-	for _, r := range rucksacks {
-		duplicate := findDuplicate(r)
-		sum += getPriority(duplicate)
+	res1, res2 := "", ""
+	if task != 2 {
+		sum := 0
+		for _, r := range rucksacks {
+			duplicate := findDuplicate(r)
+			sum += getPriority(duplicate)
+		}
+		fmt.Println("Result 1:", sum)
+		res1 = fmt.Sprint(sum)
 	}
-	fmt.Println("Result 1:", sum)
-	res1 := fmt.Sprint(sum)
-	badgeSum := 0
-	badges := findBadges(rucksacks)
-	for _, b := range badges {
-		badgeSum += getPriority(b)
+	if task != 1 {
+		badgeSum := 0
+		badges := findBadges(rucksacks)
+		for _, b := range badges {
+			badgeSum += getPriority(b)
+		}
+		for _, b := range badges {
+			fmt.Print(string(b))
+		}
+		fmt.Println()
+		fmt.Println("Result 2:", badgeSum)
+		res2 = fmt.Sprint(badgeSum)
 	}
-	for _, b := range badges {
-		fmt.Print(string(b))
-	}
-	fmt.Println()
-	fmt.Println("Result 2:", badgeSum)
-	res2 := fmt.Sprint(badgeSum)
 	return res1, res2
 }

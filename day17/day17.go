@@ -2,7 +2,6 @@ package day17
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/mnlphlp/aoc22/util"
 )
@@ -48,8 +47,7 @@ func (r rock) Draw() {
 	}
 }
 
-func parseInput(file string) []util.Move {
-	input, _ := os.ReadFile(file)
+func parseInput(input string) []util.Move {
 	moves := make([]util.Move, 0)
 	for _, c := range input {
 		if c == '<' {
@@ -149,12 +147,8 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 	return fmt.Sprint(maxFloor)
 }
 
-func Solve(test bool, task int) (string, string) {
-	inputFile := "day17/input.txt"
-	if test {
-		inputFile = "day17/testInput.txt"
-	}
-	input := parseInput(inputFile)
+func Solve(inputStr string, test bool, task int) (string, string) {
+	input := parseInput(inputStr)
 	if test {
 		fmt.Println("Rocks: ")
 		for _, r := range rocks {
@@ -169,6 +163,7 @@ func Solve(test bool, task int) (string, string) {
 		res1 = simulateDrops(input, test, 2022)
 		fmt.Println("Result 1: ", res1)
 	}
+	return res1, res2
 	if task != 1 {
 		res2 = simulateDrops(input, test, 1000000000000)
 		fmt.Println("Result 2: ", res2)

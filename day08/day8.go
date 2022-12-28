@@ -2,15 +2,13 @@ package day08
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
-func parseInput() [][]int {
+func parseInput(input string) [][]int {
 	// read input into 2d array
-	f, _ := os.ReadFile("day08/input.txt")
-	lines := strings.Split(string(f), "\n")
+	lines := strings.Split(input, "\n")
 	grid := make([][]int, len(lines))
 	for row, line := range lines {
 		grid[row] = make([]int, len(line))
@@ -97,12 +95,19 @@ func countVisible(grid [][]int) (int, int, [2]int) {
 	return visible, maxScenic, scenicPos
 }
 
-func Solve(test bool) (string, string) {
+func Solve(input string, test bool, task int) (string, string) {
+	res1, res2 := "", ""
 	// read input into 2d array
-	grid := parseInput()
+	grid := parseInput(input)
 	// count visible trees
 	visible, mostScenic, scenicPos := countVisible(grid)
-	fmt.Println("Task 1: ", visible)
-	fmt.Println("Task 2: ", mostScenic, " at ", scenicPos[0], ",", scenicPos[1])
-	return strconv.Itoa(visible), strconv.Itoa(mostScenic)
+	if task != 2 {
+		fmt.Println("Task 1: ", visible)
+		res1 = strconv.Itoa(visible)
+	}
+	if task != 1 {
+		fmt.Println("Task 2: ", mostScenic, " at ", scenicPos[0], ",", scenicPos[1])
+		res2 = strconv.Itoa(mostScenic)
+	}
+	return res1, res2
 }

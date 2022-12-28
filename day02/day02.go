@@ -2,7 +2,6 @@ package day02
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -66,27 +65,31 @@ func calcScore2(line string) int {
 	return score
 }
 
-func Solve(test bool) (string, string) {
-	input, _ := os.ReadFile("day02/input.txt")
+func Solve(input string, test bool, task int) (string, string) {
+	res1, res2 := "", ""
 	lines := strings.Split(string(input), "\n")
-	score := 0
-	for _, line := range lines {
-		if line == "" {
-			continue
+	if task != 2 {
+		score := 0
+		for _, line := range lines {
+			if line == "" {
+				continue
+			}
+			score += calcScore(line)
 		}
-		score += calcScore(line)
+		fmt.Printf("Score 1: %v\n", score)
+		res1 = fmt.Sprintf("%d", score)
 	}
-	fmt.Printf("Score 1: %v\n", score)
-	res1 := fmt.Sprintf("%d", score)
 
-	score = 0
-	for _, line := range lines {
-		if line == "" {
-			continue
+	if task != 1 {
+		score := 0
+		for _, line := range lines {
+			if line == "" {
+				continue
+			}
+			score += calcScore2(line)
 		}
-		score += calcScore2(line)
+		fmt.Printf("Score 2: %v\n", score)
+		res2 = fmt.Sprintf("%d", score)
 	}
-	fmt.Printf("Score 2: %v\n", score)
-	res2 := fmt.Sprintf("%d", score)
 	return res1, res2
 }

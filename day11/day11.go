@@ -2,7 +2,6 @@ package day11
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -103,66 +102,65 @@ func parseInput(input string) []monkey {
 	return monkeys
 }
 
-func Solve(test bool) (string, string) {
-	var input []byte
-	if test {
-		input, _ = os.ReadFile("day11/testInput.txt")
-	} else {
-		input, _ = os.ReadFile("day11/input.txt")
-	}
-	monkeys := parseInput(string(input))
+func Solve(input string, test bool, task int) (string, string) {
+	monkeys := parseInput(input)
+	res1, res2 := "", ""
 	if test {
 		for _, m := range monkeys {
 			fmt.Println(m)
 		}
 	}
 
-	// Task 1
-	// run for 20 rounds
-	for i := 0; i < 20; i++ {
-		for m := range monkeys {
-			monkeys[m].playRound(monkeys, 0)
-		}
-		if i == 0 && test {
-			for _, m := range monkeys {
-				fmt.Printf("Monkey %d: %v\n", m.number, m.items)
+	if task != 2 {
+		// Task 1
+		// run for 20 rounds
+		for i := 0; i < 20; i++ {
+			for m := range monkeys {
+				monkeys[m].playRound(monkeys, 0)
+			}
+			if i == 0 && test {
+				for _, m := range monkeys {
+					fmt.Printf("Monkey %d: %v\n", m.number, m.items)
+				}
 			}
 		}
+
+		// find two most active monkeys
+		if test {
+			for _, m := range monkeys {
+				fmt.Printf("Monkey %d inspected items %d times\n", m.number, m.inspected)
+			}
+		}
+		sort.Slice(monkeys, func(i, j int) bool {
+			return monkeys[i].inspected > monkeys[j].inspected
+		})
+		res1_int := monkeys[0].inspected * monkeys[1].inspected
+		fmt.Println("Result Task 1: ", res1_int)
+		res1 = strconv.Itoa(res1_int)
 	}
 
-	// find two most active monkeys
-	if test {
+	if task != 1 {
+		// Task 2
+		// reset monkeys
+		monkeys = parseInput(string(input))
+		modVal := 1
 		for _, m := range monkeys {
-			fmt.Printf("Monkey %d inspected items %d times\n", m.number, m.inspected)
+			if modVal%m.divTest != 0 {
+				modVal *= m.divTest
+			}
 		}
-	}
-	sort.Slice(monkeys, func(i, j int) bool {
-		return monkeys[i].inspected > monkeys[j].inspected
-	})
-	res1_int := monkeys[0].inspected * monkeys[1].inspected
-	fmt.Println("Result Task 1: ", res1_int)
-	res1 := strconv.Itoa(res1_int)
-
-	// Task 2
-	// reset monkeys
-	monkeys = parseInput(string(input))
-	modVal := 1
-	for _, m := range monkeys {
-		if modVal%m.divTest != 0 {
-			modVal *= m.divTest
+		// run for 10000 rounds
+		for i := 0; i < 10000; i++ {
+			for m := range monkeys {
+				monkeys[m].playRound(monkeys, modVal)
+			}
 		}
+		sort.Slice(monkeys, func(i, j int) bool {
+			return monkeys[i].inspected > monkeys[j].inspected
+		})
+		res2_int := monkeys[0].inspected * monkeys[1].inspected
+		fmt.Println("Result Task 2: ", res2_int)
+		res2 = strconv.Itoa(res2_int)
 	}
-	// run for 10000 rounds
-	for i := 0; i < 10000; i++ {
-		for m := range monkeys {
-			monkeys[m].playRound(monkeys, modVal)
-		}
-	}
-	sort.Slice(monkeys, func(i, j int) bool {
-		return monkeys[i].inspected > monkeys[j].inspected
-	})
-	res2_int := monkeys[0].inspected * monkeys[1].inspected
-	fmt.Println("Result Task 2: ", res2_int)
-	res2 := strconv.Itoa(res2_int)
 	return res1, res2
 }

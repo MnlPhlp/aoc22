@@ -25,37 +25,38 @@ import (
 	"github.com/mnlphlp/aoc22/day15"
 	"github.com/mnlphlp/aoc22/day16"
 	"github.com/mnlphlp/aoc22/day17"
+	"github.com/mnlphlp/aoc22/util"
 )
 
-func notImplemented(day int) func(bool, int) (string, string) {
-	return func(b bool, i int) (string, string) {
+func notImplemented(day int) func(string, bool, int) (string, string) {
+	return func(str string, b bool, i int) (string, string) {
 		fmt.Printf("day %v is not implemented in go\n", day)
 		return "not", "implemented"
 	}
 }
 
-func wrap(f func(bool) (string, string)) func(bool, int) (string, string) {
-	return func(b bool, i int) (string, string) {
+func wrap(f func(bool) (string, string)) func(string, bool, int) (string, string) {
+	return func(s string, b bool, i int) (string, string) {
 		return f(b)
 	}
 }
 
-var dayFuncs = [...]func(bool, int) (string, string){
-	wrap(day01.Solve),
-	wrap(day02.Solve),
-	wrap(day03.Solve),
-	wrap(day04.Solve),
-	wrap(day05.Solve),
-	wrap(day06.Solve),
-	wrap(day07.Solve),
-	wrap(day08.Solve),
-	wrap(day09.Solve),
-	wrap(day10.Solve),
-	wrap(day11.Solve),
-	wrap(day12.Solve),
-	wrap(day13.Solve),
-	wrap(day14.Solve),
-	wrap(day15.Solve),
+var dayFuncs = [...]func(string, bool, int) (string, string){
+	day01.Solve,
+	day02.Solve,
+	day03.Solve,
+	day04.Solve,
+	day05.Solve,
+	day06.Solve,
+	day07.Solve,
+	day08.Solve,
+	day09.Solve,
+	day10.Solve,
+	day11.Solve,
+	day12.Solve,
+	day13.Solve,
+	day14.Solve,
+	day15.Solve,
 	day16.Solve,
 	day17.Solve,
 	notImplemented(18),
@@ -65,6 +66,13 @@ var dayFuncs = [...]func(bool, int) (string, string){
 	notImplemented(22),
 	notImplemented(23),
 	notImplemented(24),
+}
+
+func capLength(str string, length int) string {
+	if len(str) > length {
+		return str[:length-3] + "..."
+	}
+	return str
 }
 
 func main() {
@@ -103,7 +111,8 @@ func main() {
 	for i, day := range days {
 		fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
 		start := time.Now()
-		res1, res2 := dayFuncs[day-1](*test, *task)
+		input := util.ReadInput(day, *test)
+		res1, res2 := dayFuncs[day-1](input, *test, *task)
 		times[i] = float32(time.Since(start).Microseconds()) / 1000
 		results1[i] = res1
 		results2[i] = res2
@@ -114,7 +123,7 @@ func main() {
 	results += "day | result 1        | result 2        | time (ms) | % of overall time\n"
 	results += "--: | :-------------: | :--------------:| --------: | :--------\n"
 	for i, day := range days {
-		results += fmt.Sprintf("%3d | %-15s | %-15s | %9.2f | %5.2f %%\n", day, results1[i], results2[i], times[i], times[i]/overall*100)
+		results += fmt.Sprintf("%3d | %-15s | %-15s | %9.2f | %5.2f %%\n", day, capLength(results1[i], 15), capLength(results2[i], 15), times[i], times[i]/overall*100)
 	}
 	results += fmt.Sprintf("\nOverall Time: %.2f s\n", overall/1000)
 	if *updateReadme {

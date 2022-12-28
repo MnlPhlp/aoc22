@@ -2,7 +2,6 @@ package day12
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -46,10 +45,9 @@ func (n node) isIn(nodes []*node) bool {
 	return false
 }
 
-func parse(inputFile string) (grid [][]*node, start *node, goal *node) {
-	input := handleErr(os.ReadFile(inputFile))
+func parse(input string) (grid [][]*node, start *node, goal *node) {
 	grid = make([][]*node, 0)
-	for y, line := range strings.Split(string(input), "\n") {
+	for y, line := range strings.Split(input, "\n") {
 		if len(line) == 0 {
 			continue
 		}
@@ -164,49 +162,49 @@ func resetGrid(grid [][]*node) {
 	}
 }
 
-func Solve(test bool) (string, string) {
-	var inputFile string
-	if test {
-		inputFile = "day12/testInput.txt"
-	} else {
-		inputFile = "day12/input.txt"
-	}
-	grid, start, goal := parse(inputFile)
+func Solve(input string, test bool, task int) (string, string) {
+	grid, start, goal := parse(input)
 	fmt.Println("start: ", start.pos)
 	fmt.Println("goal: ", goal.pos)
+	res1, res2 := "", ""
 
-	path, _ := findPath(grid, start, goal)
-	if test {
-		fmt.Println("Pfad: ", path)
+	if task != 2 {
+		path, _ := findPath(grid, start, goal)
+		if test {
+			fmt.Println("Pfad: ", path)
+		}
+
+		fmt.Println("Result Task 1: ", len(path)-1)
+		res1 = strconv.Itoa(len(path) - 1)
 	}
 
-	fmt.Println("Result Task 1: ", len(path)-1)
-	res1 := strconv.Itoa(len(path) - 1)
-
-	// reset the nodes
-	resetGrid(grid)
-	shortestPath := 100000000
-	// find all starting points
-	for _, row := range grid {
-		for _, node := range row {
-			// if possible start node calculate path
-			if node.height == 0 {
-				pathTmp, ok := findPath(grid, node, goal)
-				if ok && len(pathTmp) < shortestPath {
-					shortestPath = len(pathTmp)
-					path = pathTmp
+	if task != 1 {
+		var path [][2]int
+		// reset the nodes
+		resetGrid(grid)
+		shortestPath := 100000000
+		// find all starting points
+		for _, row := range grid {
+			for _, node := range row {
+				// if possible start node calculate path
+				if node.height == 0 {
+					pathTmp, ok := findPath(grid, node, goal)
+					if ok && len(pathTmp) < shortestPath {
+						shortestPath = len(pathTmp)
+						path = pathTmp
+					}
+					// reset the nodes
+					resetGrid(grid)
 				}
-				// reset the nodes
-				resetGrid(grid)
 			}
 		}
-	}
 
-	if test {
-		fmt.Println("Pfad: ", path)
-	}
+		if test {
+			fmt.Println("Pfad: ", path)
+		}
 
-	fmt.Println("Result Task 2: ", len(path)-1)
-	res2 := strconv.Itoa(len(path) - 1)
+		fmt.Println("Result Task 2: ", len(path)-1)
+		res2 = strconv.Itoa(len(path) - 1)
+	}
 	return res1, res2
 }

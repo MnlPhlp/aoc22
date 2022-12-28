@@ -2,7 +2,6 @@ package day15
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -20,13 +19,12 @@ type grid struct {
 	beacons []point
 }
 
-func parseInput(inputFile string) grid {
+func parseInput(input string) grid {
 	g := grid{
 		sensors: make([]sensor, 0),
 		beacons: make([]point, 0),
 	}
-	input, _ := os.ReadFile(inputFile)
-	for _, l := range strings.Split(string(input), "\n") {
+	for _, l := range strings.Split(input, "\n") {
 		if len(l) == 0 {
 			continue
 		}
@@ -123,31 +121,34 @@ func findFreeSpot(g grid, min, max int) point {
 	return point{0, 0}
 }
 
-func Solve(test bool) (string, string) {
+func Solve(input string, test bool, task int) (string, string) {
+	res1, res2 := "", ""
 	// parse Input
-	inputFile := "day15/input.txt"
 	line := 2000000
 	max := 4000000
 	if test {
-		inputFile = "day15/testInput.txt"
 		line = 10
 		max = 20
 	}
-	grid := parseInput(inputFile)
+	grid := parseInput(input)
 	if test {
 		fmt.Printf("Beacons: %v\nSensors: %v\n", grid.beacons, grid.sensors)
 	}
 
-	// Task 1
-	coveredPoints := getCoveredPoints(grid, line)
-	fmt.Printf("Task 1: %v\n", coveredPoints)
-	re1 := fmt.Sprintf("%v", coveredPoints)
+	if task != 2 {
+		// Task 1
+		coveredPoints := getCoveredPoints(grid, line)
+		fmt.Printf("Task 1: %v\n", coveredPoints)
+		res1 = fmt.Sprintf("%v", coveredPoints)
+	}
 
-	// Task 2
-	freeSpot := findFreeSpot(grid, 0, max)
-	res2 := fmt.Sprintf("%v", freeSpot.x*4000000+freeSpot.y)
-	fmt.Printf("Free spot: %v\n", freeSpot)
-	fmt.Println("Task 2:", res2)
+	if task != 1 {
+		// Task 2
+		freeSpot := findFreeSpot(grid, 0, max)
+		res2 = fmt.Sprintf("%v", freeSpot.x*4000000+freeSpot.y)
+		fmt.Printf("Free spot: %v\n", freeSpot)
+		fmt.Println("Task 2:", res2)
+	}
 
-	return re1, res2
+	return res1, res2
 }

@@ -2,17 +2,16 @@ package day05
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 )
 
-func parseStacks(input []byte) [][]byte {
+func parseStacks(input string) [][]byte {
 	stacks := make([][]byte, 0)
 	stackLines := make([]string, 0)
 	stackCount := 0
 
-	for _, l := range strings.Split(string(input), "\n") {
+	for _, l := range strings.Split(input, "\n") {
 		if strings.HasPrefix(l, "[") {
 			stackLines = append(stackLines, l)
 		} else {
@@ -39,17 +38,15 @@ func parseStacks(input []byte) [][]byte {
 	return stacks
 }
 
-func parseInput(inputFile string) ([][]byte, [][3]int) {
-	input, _ := os.ReadFile(inputFile)
-
+func parseInput(input string) ([][]byte, [][3]int) {
 	stacks := parseStacks(input)
 	instructions := parseInstructions(input)
 	return stacks, instructions
 }
 
-func parseInstructions(input []byte) [][3]int {
+func parseInstructions(input string) [][3]int {
 	instructions := make([][3]int, 0)
-	for _, l := range strings.Split(string(input), "\n") {
+	for _, l := range strings.Split(input, "\n") {
 		if strings.HasPrefix(l, "move") {
 			parts := strings.Split(l, " ")
 			inst := [3]int{}
@@ -83,9 +80,9 @@ func doMoves(stacks [][]byte, instructions [][3]int, moveAtOnce bool) {
 	}
 }
 
-func Solve(test bool) (string, string) {
-	inputFile := "day05/input.txt"
-	stacks, instructions := parseInput(inputFile)
+func Solve(input string, test bool, task int) (string, string) {
+	res1, res2 := "", ""
+	stacks, instructions := parseInput(input)
 	stacks2 := make([][]byte, len(stacks))
 	for i := range stacks {
 		stacks2[i] = make([]byte, len(stacks[i]))
@@ -93,24 +90,28 @@ func Solve(test bool) (string, string) {
 	}
 
 	// move one item at a time
-	doMoves(stacks, instructions, false)
-	res1 := ""
-	for _, s := range stacks {
-		if len(s) > 0 {
-			res1 += string(s[len(s)-1])
+	if task != 2 {
+		doMoves(stacks, instructions, false)
+		res1 = ""
+		for _, s := range stacks {
+			if len(s) > 0 {
+				res1 += string(s[len(s)-1])
+			}
 		}
+		fmt.Println("Task 1: ", res1)
 	}
-	fmt.Println("Task 1: ", res1)
 
-	// move all items at once
-	doMoves(stacks2, instructions, true)
-	res2 := ""
-	for _, s := range stacks2 {
-		if len(s) > 0 {
-			res2 += string(s[len(s)-1])
+	if task != 1 {
+		// move all items at once
+		doMoves(stacks2, instructions, true)
+		res2 = ""
+		for _, s := range stacks2 {
+			if len(s) > 0 {
+				res2 += string(s[len(s)-1])
+			}
 		}
+		fmt.Println("Task 2: ", res2)
 	}
-	fmt.Println("Task 1: ", res1)
 
 	return res1, res2
 }
