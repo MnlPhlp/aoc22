@@ -143,7 +143,7 @@ func main() {
 			float32(times[i].Microseconds())/float32(overall.Microseconds())*100)
 	}
 	results += fmt.Sprintf("\nOverall Time: %v\n", overall)
-	results += fmt.Sprintf("Summed Time: %v\n", util.Sum(times))
+	results += fmt.Sprintf("\nSummed Time: %v\n", util.Sum(times))
 	if *updateReadme {
 		content, _ := os.ReadFile("README.md")
 		startIndex := strings.Index(string(content), "## Results:\n")
