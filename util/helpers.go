@@ -31,3 +31,17 @@ func Sum[T constraints.Ordered](arr []T) T {
 	}
 	return sum
 }
+
+func Min[T constraints.Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max[T constraints.Ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
+}

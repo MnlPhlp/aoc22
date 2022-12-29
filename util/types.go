@@ -1,17 +1,28 @@
 package util
 
-type Pos struct{ X, Y int }
+type Pos2 struct{ X, Y int }
+type Pos3 struct{ X, Y, Z int }
 
-func (p Pos) Add(m Pos) Pos {
-	return Pos{p.X + m.X, p.Y + m.Y}
+func (p Pos3) Add(m Pos3) Pos3 {
+	return Pos3{p.X + m.X, p.Y + m.Y, p.Z + m.Z}
+}
+func MinPos(p1, p2 Pos3) Pos3 {
+	return Pos3{Min(p1.X, p2.X), Min(p1.Y, p2.Y), Min(p1.Z, p2.Z)}
+}
+func MaxPos(p1, p2 Pos3) Pos3 {
+	return Pos3{Max(p1.X, p2.X), Max(p1.Y, p2.Y), Max(p1.Z, p2.Z)}
 }
 
-func (p *Pos) Move(m Move) {
+func (p Pos2) Add(m Pos2) Pos2 {
+	return Pos2{p.X + m.X, p.Y + m.Y}
+}
+
+func (p *Pos2) Move(m Move) {
 	p.X += m.X
 	p.Y += m.Y
 }
 
-type Move Pos
+type Move Pos2
 
 func (m Move) String() string {
 	if m.X < 0 {

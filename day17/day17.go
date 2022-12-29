@@ -11,34 +11,34 @@ import (
 
 type rock struct {
 	// bottom left corner of a rectangle around the rock
-	Pos util.Pos
+	Pos util.Pos2
 	// relative position of top right corner of the rectangle
-	TopRight util.Pos
+	TopRight util.Pos2
 	// relative positions of all filled cells
-	Shape []util.Pos
+	Shape []util.Pos2
 }
 
 var rocks = []rock{
 	// horizontal line
-	{util.Pos{0, 0}, util.Pos{3, 0}, []util.Pos{{0, 0}, {1, 0}, {2, 0}, {3, 0}}},
+	{util.Pos2{0, 0}, util.Pos2{3, 0}, []util.Pos2{{0, 0}, {1, 0}, {2, 0}, {3, 0}}},
 	// plus shape
-	{util.Pos{0, 0}, util.Pos{2, 2}, []util.Pos{{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}}},
+	{util.Pos2{0, 0}, util.Pos2{2, 2}, []util.Pos2{{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}}},
 	// inverted L shape
-	{util.Pos{0, 0}, util.Pos{2, 2}, []util.Pos{{0, 0}, {1, 0}, {2, 0}, {2, 1}, {2, 2}}},
+	{util.Pos2{0, 0}, util.Pos2{2, 2}, []util.Pos2{{0, 0}, {1, 0}, {2, 0}, {2, 1}, {2, 2}}},
 	// vertical line
-	{util.Pos{0, 0}, util.Pos{0, 3}, []util.Pos{{0, 0}, {0, 1}, {0, 2}, {0, 3}}},
+	{util.Pos2{0, 0}, util.Pos2{0, 3}, []util.Pos2{{0, 0}, {0, 1}, {0, 2}, {0, 3}}},
 	// cube
-	{util.Pos{0, 0}, util.Pos{1, 1}, []util.Pos{{0, 0}, {0, 1}, {1, 0}, {1, 1}}},
+	{util.Pos2{0, 0}, util.Pos2{1, 1}, []util.Pos2{{0, 0}, {0, 1}, {1, 0}, {1, 1}}},
 }
 
 func (r rock) Draw() {
-	filled := make(map[util.Pos]bool)
+	filled := make(map[util.Pos2]bool)
 	for _, pos := range r.Shape {
-		filled[util.Pos{r.Pos.X + pos.X, r.Pos.Y + pos.Y}] = true
+		filled[util.Pos2{r.Pos.X + pos.X, r.Pos.Y + pos.Y}] = true
 	}
 	for y := r.Pos.Y + r.TopRight.Y; y >= r.Pos.Y; y-- {
 		for x := r.Pos.X; x <= r.Pos.X+r.TopRight.X; x++ {
-			if filled[util.Pos{x, y}] {
+			if filled[util.Pos2{x, y}] {
 				fmt.Print("#")
 			} else {
 				fmt.Print(".")
@@ -65,16 +65,16 @@ type cacheState struct {
 	maxFloor int
 }
 
-func hashState(filled map[util.Pos]bool, rockType int, move int, maxHeight int) string {
+func hashState(filled map[util.Pos2]bool, rockType int, move int, maxHeight int) string {
 	minFloor := maxHeight
 	for pos := range filled {
 		if pos.Y < minFloor {
 			minFloor = pos.Y
 		}
 	}
-	normalizedFilled := make([]util.Pos, 0)
+	normalizedFilled := make([]util.Pos2, 0)
 	for pos := range filled {
-		normalizedFilled = append(normalizedFilled, util.Pos{pos.X, pos.Y - minFloor})
+		normalizedFilled = append(normalizedFilled, util.Pos2{pos.X, pos.Y - minFloor})
 	}
 	sort.Slice(normalizedFilled, func(i, j int) bool {
 		if normalizedFilled[i].Y == normalizedFilled[j].Y {
@@ -91,11 +91,11 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 	move := -1
 	topRock := rock{}
 	maxFloor := 0
-	filled := make(map[util.Pos]bool)
+	filled := make(map[util.Pos2]bool)
 	cache := make(map[string]cacheState)
 	minFloor := 0
 	for x := 0; x < 7; x++ {
-		filled[util.Pos{x, 0}] = true
+		filled[util.Pos2{x, 0}] = true
 	}
 	for i := 0; i < drops; i++ {
 		// place new rock
@@ -116,7 +116,7 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 			} else {
 				// check if rock hits another rock
 				for _, pos := range topRock.Shape {
-					if filled[util.Pos{topRock.Pos.X + pos.X, topRock.Pos.Y + pos.Y}] {
+					if filled[util.Pos2{topRock.Pos.X + pos.X, topRock.Pos.Y + pos.Y}] {
 						// rock hits another rock
 						topRock.Pos = oldPos
 					}
@@ -138,11 +138,11 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 		// rock hits the floor
 		for _, pos := range topRock.Shape {
 			x, y := topRock.Pos.X+pos.X, topRock.Pos.Y+pos.Y
-			filled[util.Pos{x, y}] = true
+			filled[util.Pos2{x, y}] = true
 			// check if closed floor and remove everything below
 			newFloor := true
 			for x1 := 0; x1 < 7; x1++ {
-				if !filled[util.Pos{x1, y}] && !filled[util.Pos{x1, y + 1}] && !filled[util.Pos{x1, y - 1}] {
+				if !filled[util.Pos2{x1, y}] && !filled[util.Pos2{x1, y + 1}] && !filled[util.Pos2{x1, y - 1}] {
 					newFloor = false
 					break
 				}
@@ -151,7 +151,7 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 				// remove everything below
 				for y1 := minFloor; y1 < y-1; y1++ {
 					for x1 := 0; x1 < 7; x1++ {
-						delete(filled, util.Pos{x1, y1})
+						delete(filled, util.Pos2{x1, y1})
 					}
 				}
 				minFloor = y - 1
@@ -173,13 +173,13 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 				i += stepsGain
 				maxFloor += heightGain
 				minFloor += heightGain
-				keys := make([]util.Pos, 0, len(filled))
+				keys := make([]util.Pos2, 0, len(filled))
 				for p := range filled {
 					keys = append(keys, p)
 				}
 				for _, k := range keys {
 					delete(filled, k)
-					filled[util.Pos{k.X, k.Y + heightGain}] = true
+					filled[util.Pos2{k.X, k.Y + heightGain}] = true
 				}
 			}
 		} else {
