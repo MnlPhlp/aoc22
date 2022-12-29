@@ -2,6 +2,7 @@ package day17
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/mnlphlp/aoc22/util"
 )
@@ -59,20 +60,52 @@ func parseInput(input string) []util.Move {
 	return moves
 }
 
+type cacheState struct {
+	drop     int
+	maxFloor int
+}
+
+const hashDepth = 50
+
+func hashState(filled map[util.Pos]bool, rockType int, move int, maxHeight int) string {
+	minFloor := maxHeight
+	for pos := range filled {
+		if maxHeight-pos.Y > hashDepth {
+			continue
+		}
+		if pos.Y < minFloor {
+			minFloor = pos.Y
+		}
+	}
+	normalizedFilled := make([]util.Pos, 0)
+	for pos := range filled {
+		if maxHeight-pos.Y > hashDepth {
+			continue
+		}
+		normalizedFilled = append(normalizedFilled, util.Pos{pos.X, pos.Y - minFloor})
+	}
+	sort.Slice(normalizedFilled, func(i, j int) bool {
+		if normalizedFilled[i].Y == normalizedFilled[j].Y {
+			return normalizedFilled[i].X < normalizedFilled[j].X
+		} else {
+			return normalizedFilled[i].Y < normalizedFilled[j].Y
+		}
+	})
+	return fmt.Sprintf("%v|%d|%d", normalizedFilled, rockType, move)
+}
+
 func simulateDrops(input []util.Move, test bool, drops int) string {
 	rockType := -1
 	move := -1
 	topRock := rock{}
 	maxFloor := 0
-	floor := [7]int{}
 	filled := make(map[util.Pos]bool)
+	cache := make(map[string]cacheState)
+	minFloor := 0
 	for x := 0; x < 7; x++ {
 		filled[util.Pos{x, 0}] = true
 	}
 	for i := 0; i < drops; i++ {
-		if i%10000 == 0 {
-			fmt.Printf("%f%% done. Filled size %d\n", float64(i*1000/drops)/10, len(filled))
-		}
 		// place new rock
 		rockType = (rockType + 1) % len(rocks)
 		topRock = rocks[rockType]
@@ -117,27 +150,54 @@ func simulateDrops(input []util.Move, test bool, drops int) string {
 			// check if closed floor and remove everything below
 			newFloor := true
 			for x1 := 0; x1 < 7; x1++ {
-				if !filled[util.Pos{x1, y}] {
+				if !filled[util.Pos{x1, y}] && !filled[util.Pos{x1, y + 1}] && !filled[util.Pos{x1, y - 1}] {
 					newFloor = false
 					break
 				}
 			}
 			if newFloor {
 				// remove everything below
-				for y1 := 0; y1 < y; y1++ {
+				for y1 := minFloor; y1 < y-1; y1++ {
 					for x1 := 0; x1 < 7; x1++ {
 						delete(filled, util.Pos{x1, y1})
 					}
 				}
-			}
-			// update floor
-			if y > floor[x] {
-				floor[x] = y
+				minFloor = y - 1
 			}
 			if y > maxFloor {
 				maxFloor = y
 			}
 		}
+		// check if cache can be used
+		hash := hashState(filled, rockType, move, maxFloor)
+		if cached, ok := cache[hash]; ok {
+			// cache hit
+			stepsGain := i - cached.drop
+			heightGain := maxFloor - cached.maxFloor
+			count := (drops - i) / stepsGain
+			if count > 0 {
+				stepsGain *= count
+				heightGain *= count
+				i += stepsGain
+				maxFloor += heightGain
+				minFloor += heightGain
+				keys := make([]util.Pos, 0, len(filled))
+				for p := range filled {
+					keys = append(keys, p)
+				}
+				for _, k := range keys {
+					delete(filled, k)
+					filled[util.Pos{k.X, k.Y + heightGain}] = true
+				}
+			}
+		} else {
+			// cache miss
+			cache[hash] = cacheState{
+				drop:     i,
+				maxFloor: maxFloor,
+			}
+		}
+
 		if test && i < 10 {
 			fmt.Printf("Drop %d: maxFloor: %d\n", i, maxFloor)
 		}
@@ -159,7 +219,6 @@ func Solve(inputStr string, test bool, task int) (string, string) {
 		res1 = simulateDrops(input, test, 2022)
 		fmt.Println("Result 1: ", res1)
 	}
-	return res1, res2
 	if task != 1 {
 		res2 = simulateDrops(input, test, 1000000000000)
 		fmt.Println("Result 2: ", res2)

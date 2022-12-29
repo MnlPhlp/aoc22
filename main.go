@@ -76,11 +76,11 @@ func capLength(str string, length int) string {
 	return str
 }
 
-func calcDay(day int, i int, results1 []string, results2 []string, times []time.Duration, test bool, task int) {
+func calcDay(day int, i int, results1 []string, results2 []string, times []time.Duration, test bool, task int, debug bool) {
 	fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
 	start := time.Now()
 	input := util.ReadInput(day, test)
-	res1, res2 := dayFuncs[day-1](input, test, task)
+	res1, res2 := dayFuncs[day-1](input, test || debug, task)
 	times[i] = time.Since(start)
 	results1[i] = res1
 	results2[i] = res2
@@ -93,6 +93,7 @@ func main() {
 	task := flag.Int("task", 0, "task (0=both, 1=task1, 2=task2)")
 	updateReadme := flag.Bool("readme", false, "updateReadme")
 	parallel := flag.Bool("p", false, "parallel")
+	debug := flag.Bool("debug", false, "debug")
 	flag.Parse()
 	*dayStr = strings.Trim(*dayStr, "day.go")
 	day, _ := strconv.Atoi(*dayStr)
@@ -126,13 +127,13 @@ func main() {
 			wg.Add(1)
 			go func(i int, day int) {
 				defer wg.Done()
-				calcDay(day, i, results1, results2, times, *test, *task)
+				calcDay(day, i, results1, results2, times, *test, *task, *debug)
 			}(i, day)
 		}
 		wg.Wait()
 	} else {
 		for i, day := range days {
-			calcDay(day, i, results1, results2, times, *test, *task)
+			calcDay(day, i, results1, results2, times, *test, *task, *debug)
 		}
 	}
 	overall := time.Since(start)
