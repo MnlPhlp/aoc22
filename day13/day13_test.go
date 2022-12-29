@@ -2,9 +2,9 @@ package day13
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
+	"github.com/mnlphlp/aoc22/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +38,7 @@ func printItem(i item) string {
 }
 
 func TestExample(t *testing.T) {
-	pairs := parseInput("testInput.txt")
+	pairs := parseInput(util.ReadInputUnittest(13, true))
 	for i, res := range []bool{true, true, false, true, false, true, false, false} {
 		ok, finished := checkPair(pairs[i])
 		assert.True(t, finished, "Pair %d not finished", i)
@@ -47,8 +47,8 @@ func TestExample(t *testing.T) {
 }
 
 func TestParser(t *testing.T) {
-	expected, _ := os.ReadFile("input.txt")
-	pairs := parseInput("input.txt")
+	expected := util.ReadInputUnittest(13, false)
+	pairs := parseInput(expected)
 	text := ""
 	for _, pair := range pairs {
 		text += pair.left.String()
@@ -56,6 +56,5 @@ func TestParser(t *testing.T) {
 		text += pair.right.String()
 		text += "\n\n"
 	}
-	os.WriteFile("output.txt", []byte(text), 0644)
-	assert.Equal(t, string(expected), text)
+	assert.Equal(t, expected, text)
 }

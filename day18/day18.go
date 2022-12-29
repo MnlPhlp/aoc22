@@ -44,48 +44,61 @@ func pocketSurfaceArea(droplet map[util.Pos3]struct{}) int {
 		max = util.MaxPos(max, pos)
 	}
 	// find closed pockets in the droplet
-	pocket := 0
+	pockets := make(map[util.Pos3]struct{}, 0)
 	for x := min.X + 1; x < max.X; x++ {
 		for y := min.Y + 1; y < max.Y; y++ {
 			for z := min.Z + 1; z < max.Z; z++ {
 				pos := util.Pos3{X: x, Y: y, Z: z}
-				if _, ok := droplet[pos]; ok {
+				if _, solid := droplet[pos]; solid {
+					continue
+				}
+				if _, inPocket := pockets[pos]; inPocket {
+					skipDistance := 0
+					for inPocket {
+						skipDistance++
+						_, inPocket = pockets[pos.Add(util.Pos3{X: 0, Y: 0, Z: skipDistance})]
+					}
+					z += skipDistance - 1
 					continue
 				}
 				// open spot found, might be a pocket
 				// check if the opening is connected to the outside
-				// by using flood fill. If not add surface area to pocket
-				pocketTmp := 0
-				open := make([]util.Pos3, 0)
-				open = append(open, pos)
-				closed := make(map[util.Pos3]struct{}, 0)
+				// If not add to pockets
+				pocketTmp := make(map[util.Pos3]struct{})
+				open := make(map[util.Pos3]struct{}, 0)
+				open[pos] = struct{}{}
 				for len(open) > 0 {
 					// get first element
-					p := open[0]
-					open = open[1:]
-					closed[p] = struct{}{}
-					// check if it is connected to the outside
-					if p.X <= min.X || p.X >= max.X || p.Y <= min.Y || p.Y >= max.Y || p.Z <= min.Z || p.Z >= max.Z {
-						pocketTmp = 0
+					var p util.Pos3
+					for p = range open {
+						delete(open, p)
+						pocketTmp[p] = struct{}{}
 						break
 					}
-					// add all neighbours to open
+					// check if it is connected to the outside
+					if p.X <= min.X || p.X >= max.X || p.Y <= min.Y || p.Y >= max.Y || p.Z <= min.Z || p.Z >= max.Z {
+						pocketTmp = nil
+						break
+					}
+					// add all neighbors to open
 					for _, d := range directions {
 						n := p.Add(d)
-						if _, ok := droplet[n]; !ok {
-							if _, ok := closed[n]; !ok {
-								open = append(open, n)
+						if _, solid := droplet[n]; !solid {
+							if _, inPocket := pocketTmp[n]; !inPocket {
+								open[n] = struct{}{}
 							}
-						} else {
-							pocketTmp++
 						}
 					}
 				}
-				pocket += pocketTmp
+				for p := range pocketTmp {
+					pockets[p] = struct{}{}
+				}
+
 			}
 		}
 	}
-	return pocket
+	// calculate surface area of pockets
+	return surfaceArea(pockets)
 }
 
 func Solve(input string, debug bool, task int) (string, string) {
@@ -104,7 +117,7 @@ func Solve(input string, debug bool, task int) (string, string) {
 		}
 		pocketArea := pocketSurfaceArea(droplet)
 		res2 = res1 - pocketArea
-		fmt.Println("Result 2: ", res1)
+		fmt.Println("Result 2: ", res2)
 	}
 
 	return fmt.Sprint(res1), fmt.Sprint(res2)

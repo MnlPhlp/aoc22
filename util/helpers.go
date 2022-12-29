@@ -24,6 +24,14 @@ func ReadInput(day int, test bool) string {
 	return string(input)
 }
 
+func ReadInputUnittest(day int, test bool) string {
+	path, _ := os.Getwd()
+	if !strings.HasSuffix(path, "aoc22") {
+		os.Chdir("..")
+	}
+	return ReadInput(day, test)
+}
+
 func Sum[T constraints.Ordered](arr []T) T {
 	var sum T
 	for _, v := range arr {
