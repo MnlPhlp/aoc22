@@ -65,23 +65,15 @@ type cacheState struct {
 	maxFloor int
 }
 
-const hashDepth = 50
-
 func hashState(filled map[util.Pos]bool, rockType int, move int, maxHeight int) string {
 	minFloor := maxHeight
 	for pos := range filled {
-		if maxHeight-pos.Y > hashDepth {
-			continue
-		}
 		if pos.Y < minFloor {
 			minFloor = pos.Y
 		}
 	}
 	normalizedFilled := make([]util.Pos, 0)
 	for pos := range filled {
-		if maxHeight-pos.Y > hashDepth {
-			continue
-		}
 		normalizedFilled = append(normalizedFilled, util.Pos{pos.X, pos.Y - minFloor})
 	}
 	sort.Slice(normalizedFilled, func(i, j int) bool {
