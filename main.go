@@ -82,11 +82,11 @@ func calcDay(day int, i int, results1 []string, results2 []string, times []time.
 func main() {
 	dayStr := flag.String("d", "", "day")
 	daysString := flag.String("days", "", "days")
-	test := flag.Bool("t", false, "test")
+	test := flag.Bool("t", false, "use test input")
 	task := flag.Int("task", 0, "task (0=both, 1=task1, 2=task2)")
 	updateReadme := flag.Bool("readme", false, "updateReadme")
-	parallel := flag.Bool("p", false, "parallel")
-	debug := flag.Bool("debug", false, "debug")
+	parallel := flag.Bool("p", false, "run in parallel (one goroutine per day)")
+	debug := flag.Bool("debug", false, "debug flag for more printing")
 	flag.Parse()
 	*dayStr = strings.Trim(*dayStr, "day.go")
 	day, _ := strconv.Atoi(*dayStr)
@@ -147,7 +147,7 @@ func main() {
 	if *updateReadme {
 		content, _ := os.ReadFile("README.md")
 		startIndex := strings.Index(string(content), "## Results:\n")
-		endIndex := strings.Index(string(content), "Overall Time:")
+		endIndex := strings.Index(string(content), "Summed Time:")
 		start := []byte{}
 		if startIndex >= 0 {
 			start = content[:startIndex]
