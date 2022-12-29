@@ -27,15 +27,9 @@ import (
 	"github.com/mnlphlp/aoc22/day16"
 	"github.com/mnlphlp/aoc22/day17"
 	"github.com/mnlphlp/aoc22/day18"
+	"github.com/mnlphlp/aoc22/day19"
 	"github.com/mnlphlp/aoc22/util"
 )
-
-func notImplemented(day int) func(string, bool, int) (string, string) {
-	return func(str string, b bool, i int) (string, string) {
-		fmt.Printf("day %v is not implemented in go\n", day)
-		return "not", "implemented"
-	}
-}
 
 var dayFuncs = [...]func(string, bool, int) (string, string){
 	day01.Solve,
@@ -56,6 +50,7 @@ var dayFuncs = [...]func(string, bool, int) (string, string){
 	day16.Solve,
 	day17.Solve,
 	day18.Solve,
+	day19.Solve,
 }
 
 func capLength(str string, length int) string {
