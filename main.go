@@ -60,13 +60,6 @@ var dayFuncs = [...]func(string, bool, int) (string, string){
 	day15.Solve,
 	day16.Solve,
 	day17.Solve,
-	notImplemented(18),
-	notImplemented(19),
-	notImplemented(20),
-	notImplemented(21),
-	notImplemented(22),
-	notImplemented(23),
-	notImplemented(24),
 }
 
 func capLength(str string, length int) string {
@@ -80,7 +73,7 @@ func calcDay(day int, i int, results1 []string, results2 []string, times []time.
 	fmt.Printf("\n##################\ncalculating day %d \n##################\n", day)
 	start := time.Now()
 	input := util.ReadInput(day, test)
-	res1, res2 := dayFuncs[day-1](input, test || debug, task)
+	res1, res2 := dayFuncs[day-1](input, debug, task)
 	times[i] = time.Since(start)
 	results1[i] = res1
 	results2[i] = res2

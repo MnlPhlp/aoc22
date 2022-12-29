@@ -14,7 +14,10 @@ func ReadInput(day int, test bool) string {
 	if test {
 		inputFile = fmt.Sprintf("day%02d/testInput.txt", day)
 	}
-	input, _ := os.ReadFile(inputFile)
+	input, err := os.ReadFile(inputFile)
+	if err != nil {
+		panic(err)
+	}
 	if runtime.GOOS == "windows" {
 		return strings.ReplaceAll(string(input), "\r\n", "\n")
 	}

@@ -12,7 +12,7 @@ func parseStacks(input string) [][]byte {
 	stackCount := 0
 
 	for _, l := range strings.Split(input, "\n") {
-		if strings.HasPrefix(l, "[") {
+		if strings.HasPrefix(strings.TrimLeft(l, " "), "[") {
 			stackLines = append(stackLines, l)
 		} else {
 			stackCount = len(strings.Replace(l, " ", "", -1))
