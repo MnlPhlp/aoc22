@@ -40,6 +40,14 @@ func Sum[T constraints.Ordered](arr []T) T {
 	return sum
 }
 
+func Mul[T constraints.Integer | constraints.Float](arr []T) T {
+	mul := T(1)
+	for _, v := range arr {
+		mul *= v
+	}
+	return mul
+}
+
 func Min[T constraints.Ordered](a, b T) T {
 	if a < b {
 		return a
@@ -47,9 +55,12 @@ func Min[T constraints.Ordered](a, b T) T {
 	return b
 }
 
-func Max[T constraints.Ordered](a, b T) T {
-	if a > b {
-		return a
+func Max[T constraints.Ordered](args ...T) T {
+	max := 0
+	for i := 1; i < len(args); i++ {
+		if args[i] > args[max] {
+			max = i
+		}
 	}
-	return b
+	return args[max]
 }
