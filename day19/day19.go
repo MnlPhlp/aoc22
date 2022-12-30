@@ -30,7 +30,6 @@ type state struct {
 	clayBots, oreBots, obsidianBots, geodeBots int
 	geodes                                     int
 	timePassed                                 int
-	hash                                       int64
 }
 
 func parseInput(input string) []blueprint {
@@ -71,16 +70,11 @@ func getQualityNumbers(blueprints []blueprint, timeSteps int, parallel bool) []i
 	return qualityNumbers
 }
 
-func hashState(s state) int64 {
-	hash := int64(s.clay)
-	hash |= int64(s.ore) << 8
-	hash |= int64(s.obsidian) << 16
-	hash |= int64(s.clayBots) << 34
-	hash |= int64(s.oreBots) << 32
-	hash |= int64(s.obsidianBots) << 40
-	hash |= int64(s.geodeBots) << 48
-	hash |= int64(s.geodes) << 56
-	hash |= int64(s.timePassed) << 60
+func hashState(s state) int {
+	hash := s.clay
+	hash |= s.ore << 8
+	hash |= s.obsidian << 16
+	hash |= s.timePassed << 24
 	return hash
 }
 
@@ -112,7 +106,6 @@ func getNeighbors(s state, bp blueprint, time int) []state {
 		new := consumeRessources(doNothing, bp.geodeRobot)
 		new.geodeBots++
 		new.geodes += time - new.timePassed
-		new.hash = hashState(new)
 		// if max count for all other robots is reached skip next steps
 		if s.clayBots == bp.maxClayCost && s.oreBots == bp.maxOreCost && s.obsidianBots == bp.maxObsidianCost {
 			// one geode bot can be build per time step
@@ -120,31 +113,26 @@ func getNeighbors(s state, bp blueprint, time int) []state {
 			new.geodeBots += remTime
 			new.geodes += int(float64(remTime) * float64(remTime) / 2)
 			new.timePassed = time
-			new.hash = hashState(new)
 		}
 		neighbors = append(neighbors, new)
 		return neighbors
 	}
 	// append doNothing
-	doNothing.hash = hashState(doNothing)
 	neighbors = append(neighbors, doNothing)
 	// append other possible bots
 	if s.clayBots < bp.maxClayCost && canBuild(s, bp.clayRobot) {
 		new := consumeRessources(doNothing, bp.clayRobot)
 		new.clayBots++
-		new.hash = hashState(new)
 		neighbors = append(neighbors, new)
 	}
 	if s.oreBots < bp.maxOreCost && canBuild(s, bp.oreRobot) {
 		new := consumeRessources(doNothing, bp.oreRobot)
 		new.oreBots++
-		new.hash = hashState(new)
 		neighbors = append(neighbors, new)
 	}
 	if s.obsidianBots < bp.maxObsidianCost && canBuild(s, bp.obsidianRobot) {
 		new := consumeRessources(doNothing, bp.obsidianRobot)
 		new.obsidianBots++
-		new.hash = hashState(new)
 		neighbors = append(neighbors, new)
 	}
 	return neighbors
@@ -153,10 +141,9 @@ func getNeighbors(s state, bp blueprint, time int) []state {
 func getMaxGeode(bp blueprint, timeSteps int) int {
 	// calculate max number of geodes cracked
 	current := state{oreBots: 1}
-	current.hash = hashState(current)
 	open := []state{current}
 	best := current
-	closed := map[int64]struct{}{}
+	closed := map[int]struct{}{}
 	for len(open) > 0 {
 		// get next state
 		current = open[len(open)-1]
@@ -166,16 +153,15 @@ func getMaxGeode(bp blueprint, timeSteps int) int {
 		if current.geodes+(remTime*(remTime/2)) <= best.geodes {
 			continue
 		}
+		closed[hashState(current)] = struct{}{}
 		if current.geodes > best.geodes {
 			best = current
 		}
-		neighbors := getNeighbors(current, bp, timeSteps)
-		for _, n := range neighbors {
-			if _, ok := closed[n.hash]; ok {
+		for _, n := range getNeighbors(current, bp, timeSteps) {
+			if _, ok := closed[hashState(n)]; ok {
 				continue
 			}
 			open = append(open, n)
-			closed[n.hash] = struct{}{}
 		}
 	}
 	if debug {
