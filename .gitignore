@@ -8,3 +8,4 @@ bin
 obj
 .idea
 day14/frames
+*.exe
