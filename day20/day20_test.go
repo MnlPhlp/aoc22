@@ -10,92 +10,31 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMoveRight(t *testing.T) {
-	f := File{
-		{0, 0},
-		{1, 1},
-		{2, 2},
-	}
-	f.Move(0, 1)
-	assert.Equal(t, "[{0 1} {1 0} {2 2}]", fmt.Sprint([]Item(f)))
-}
-
-func TestMoveRightWrap(t *testing.T) {
-	f := File{
-		{0, 0},
-		{1, 1},
-		{2, 2},
-	}
-	f.Move(2, 1)
-	assert.Equal(t, "[{0 0} {1 2} {2 1}]", fmt.Sprint([]Item(f)))
-}
-
-func TestMoveLeft(t *testing.T) {
-	f := File{
-		{0, 0},
-		{1, 1},
-		{2, 2},
-	}
-	f.Move(2, -1)
-	assert.Equal(t, "[{0 0} {1 2} {2 1}]", fmt.Sprint([]Item(f)))
-}
-
-func TestMoveLeftWrap(t *testing.T) {
-	f := File{
-		{0, 0},
-		{1, 1},
-		{2, 2},
-	}
-	f.Move(2, -2)
-	assert.Equal(t, "[{0 0} {1 1} {2 2}]", fmt.Sprint([]Item(f)))
-}
-
 func TestMoveStartLeft(t *testing.T) {
-	f := File{
-		{0, 0},
-		{1, 1},
-		{2, 2},
-	}
+	f := parseInput("0\n1\n2")
 	f.Move(1, -1)
 	assert.Equal(t, "[0 2 1]", f.String())
 	assert.False(t, f.HasDuplicatePos())
 }
 
 func TestMoveEnd(t *testing.T) {
-	f := File{
-		{0, 0},
-		{1, 1},
-		{2, 2},
-	}
+	f := parseInput("0\n1\n2")
 	f.Move(1, 1)
 	assert.Equal(t, "[1 0 2]", f.String())
 }
 
 func TestGet(t *testing.T) {
-	f := File{
-		{0, 0},
-		{1, 1},
-		{2, 2},
-	}
+	f := parseInput("0\n1\n2")
 	assert.Equal(t, "[1 2 0]", fmt.Sprint(f.Get(1, 2, 3)))
 }
 
 func TestGetWrapOtherStart(t *testing.T) {
-	f := File{
-		{1, 0},
-		{0, 1},
-		{2, 2},
-	}
+	f := parseInput("1\n0\n2")
 	assert.Equal(t, "[2 1 0]", fmt.Sprint(f.Get(1, 2, 3)))
 }
 
 func TestExampleMoves(t *testing.T) {
-	file := File{
-		{1, 0},
-		{2, 1},
-		{3, 2},
-		{4, 3},
-		{5, 4}}
+	file := parseInput("1\n2\n3\n4\n5")
 	file.Move(3, 4)
 	assert.Equal(t, "[1 2 3 4 5]", file.String())
 }
@@ -107,8 +46,7 @@ func TestParser(t *testing.T) {
 		if l == "" {
 			continue
 		}
-		assert.Equal(t, l, fmt.Sprint(file[i].Val))
-		assert.Equal(t, i, file[i].Pos)
+		assert.Equal(t, l, fmt.Sprint(file.items[i].Val))
 	}
 }
 

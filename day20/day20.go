@@ -9,133 +9,142 @@ import (
 )
 
 type Item struct {
-	Val, Pos int
+	Val  int
+	prev *Item
+	next *Item
 }
-type File []Item
+type File struct {
+	items []*Item
+	start *Item
+}
 
 func (f File) Get(is ...int) []int {
 	ints := make([]int, len(is))
-	start := 0
-	for _, v := range f {
+	zero := f.start
+	for _, v := range f.items {
 		if v.Val == 0 {
-			start = v.Pos
+			zero = v
 		}
 	}
-	for _, v := range f {
-		for i, idx := range is {
-			if v.Pos == (idx+start)%len(f) {
-				ints[i] = v.Val
-			}
+	for i, idx := range is {
+		steps := idx % len(f.items)
+		p := zero
+		for j := 0; j < steps; j++ {
+			p = p.next
 		}
+		ints[i] = p.Val
 	}
 	return ints
 }
 
 func (f File) String() string {
-	ints := make([]int, len(f))
-	for _, v := range f {
-		ints[v.Pos] = v.Val
+	ints := make([]int, len(f.items))
+	cur := f.start
+	for i := range f.items {
+		ints[i] = cur.Val
+		cur = cur.next
 	}
 	return fmt.Sprintf("%v", ints)
 }
 
-func (f File) Move(i int, m int) {
+func (f *File) Move(i int, m int) {
+	// avoid loops
+	m = m % (len(f.items) - 1)
 	if m == 0 {
 		// no move
 		return
 	}
-	m = m % (len(f) - 1)
-	oldPos := f[i].Pos
-	newPos := oldPos + m
-	if newPos < 0 {
-		// wrapped around to the end
-		newPos = len(f) + (newPos % len(f)) - 1
-	} else if newPos >= len(f) {
-		// wrapped around to the beginning
-		newPos = newPos % (len(f) - 1)
-	} else if newPos == 0 {
-		newPos = len(f) - 1
-	} else if newPos == len(f)-1 {
-		newPos = 0
+	cur := f.items[i]
+	right := cur
+	if cur == f.start {
+		f.start = cur.next
 	}
-	if oldPos == newPos {
-		return
-	}
-	for j := 0; j < len(f); j++ {
-		if j == i {
-			continue
+	if m < 0 {
+		// move backwards
+		for i := 0; i < util.Abs(m); i++ {
+			right = right.prev
 		}
-		pos := f[j].Pos
-		if m > 0 && newPos > oldPos {
-			// move right without wrapping
-			if pos > oldPos && pos <= newPos {
-				f[j].Pos--
-			}
-		} else if m < 0 && newPos < oldPos {
-			// move left without wrapping
-			if pos >= newPos && pos < oldPos {
-				f[j].Pos++
-			}
-		} else if m > 0 && newPos < oldPos {
-			// move right with wrapping
-			if pos >= newPos && pos < oldPos {
-				f[j].Pos++
-			}
-		} else if m < 0 && newPos > oldPos {
-			// move left with wrapping
-			if pos > oldPos && pos <= newPos {
-				f[j].Pos--
-			}
+	} else {
+		right = right.next
+		// move forwards
+		for i := 0; i < m; i++ {
+			right = right.next
+		}
+		if right == f.start {
+			f.start = cur
 		}
 	}
-	f[i].Pos = newPos
+	// move item to left of "right"
+	cur.prev.next = cur.next
+	cur.next.prev = cur.prev
+	cur.prev = right.prev
+	cur.next = right
+	right.prev.next = cur
+	right.prev = cur
 }
 
 func (f File) HasDuplicatePos() bool {
-	seen := make(map[int]bool)
-	for _, v := range f {
-		if seen[v.Pos] {
+	next := make(map[*Item]bool)
+	prev := make(map[*Item]bool)
+	for _, v := range f.items {
+		if next[v.next] || prev[v.prev] {
 			return true
 		}
-		seen[v.Pos] = true
+		next[v.next] = true
+		prev[v.prev] = true
 	}
 	return false
 }
 
+func (file *File) Reset() {
+	file.start = file.items[0]
+	for i, v := range file.items {
+		if i == 0 {
+			v.prev = file.items[len(file.items)-1]
+		} else {
+			v.prev = file.items[i-1]
+		}
+		if i == len(file.items)-1 {
+			v.next = file.items[0]
+		} else {
+			v.next = file.items[i+1]
+		}
+	}
+}
+
 func parseInput(input string) File {
-	file := make(File, 0)
-	i := 0
+	file := File{
+		items: make([]*Item, 0),
+	}
 	for _, line := range strings.Split(input, "\n") {
 		if line == "" {
 			continue
 		}
-		file = append(file, Item{
+		file.items = append(file.items, &Item{
 			Val: util.ParseInt(line),
-			Pos: i,
 		})
-		i++
 	}
+	file.Reset()
 	return file
 }
 
 func mix(file File, debug bool, key int, iterations int) File {
 	if key != 1 {
-		for i := 0; i < len(file); i++ {
-			old := util.Abs(file[i].Val)
-			file[i].Val *= key
-			if util.Abs(file[i].Val) < old {
+		for i := 0; i < len(file.items); i++ {
+			old := util.Abs(file.items[i].Val)
+			file.items[i].Val *= key
+			if util.Abs(file.items[i].Val) < old {
 				panic("Overflow")
 			}
 		}
 	}
 	for it := 0; it < iterations; it++ {
-		for i, v := range file {
+		for i, v := range file.items {
 			file.Move(i, v.Val)
 			if debug {
 				fmt.Println(v)
 				fmt.Println(file)
 				if file.HasDuplicatePos() {
-					fmt.Println([]Item(file))
 					panic("duplicate pos")
 				}
 			}
@@ -149,7 +158,6 @@ func Solve(input string, debugFlag bool, task int) (string, string) {
 	file := parseInput(input)
 	if debugFlag {
 		fmt.Printf("file: %v\n", file)
-		fmt.Printf("items: %v", []Item(file))
 	}
 	if task != 2 {
 		mixed := mix(file, debugFlag, 1, 1)
@@ -161,10 +169,7 @@ func Solve(input string, debugFlag bool, task int) (string, string) {
 	if task != 1 {
 		if task != 2 {
 			// reset file
-			for i := range file {
-				file[i].Pos = i
-			}
-
+			file.Reset()
 		}
 		mixed := mix(file, debugFlag, 811589153, 10)
 		values := mixed.Get(1000, 2000, 3000)

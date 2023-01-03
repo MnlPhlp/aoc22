@@ -11,7 +11,7 @@ var blueprints = parseInput(util.ReadInputUnittest(19, false))
 
 func TestTask1(t *testing.T) {
 	qualities := getQualityNumbers(blueprints, 24, true)
-	assert.Equal(t, 1192, util.Sum(qualities))
+	assert.Equal(t, 1192, util.Sum(qualities...))
 }
 
 func TestTask2(t *testing.T) {
