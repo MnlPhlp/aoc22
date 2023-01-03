@@ -28,6 +28,7 @@ import (
 	"github.com/mnlphlp/aoc22/day17"
 	"github.com/mnlphlp/aoc22/day18"
 	"github.com/mnlphlp/aoc22/day19"
+	"github.com/mnlphlp/aoc22/day20"
 	"github.com/mnlphlp/aoc22/util"
 )
 
@@ -51,6 +52,7 @@ var dayFuncs = [...]func(string, bool, int) (string, string){
 	day17.Solve,
 	day18.Solve,
 	day19.Solve,
+	day20.Solve,
 }
 
 func capLength(str string, length int) string {
@@ -134,7 +136,7 @@ func main() {
 			float32(times[i].Microseconds())/float32(overall.Microseconds())*100)
 	}
 	results += fmt.Sprintf("\nOverall Time: %v\n", overall)
-	results += fmt.Sprintf("\nSummed Time: %v\n", util.Sum(times))
+	results += fmt.Sprintf("\nSummed Time: %v\n", util.Sum(times...))
 	if *updateReadme {
 		content, _ := os.ReadFile("README.md")
 		startIndex := strings.Index(string(content), "## Results:\n")

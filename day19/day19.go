@@ -201,7 +201,7 @@ func Solve(input string, debugFlag bool, task int) (string, string) {
 	if task != 2 {
 		qualities := getQualityNumbers(blueprints, 24, !debug)
 		fmt.Printf("Quality numbers: %v\n", qualities)
-		res1 = util.Sum(qualities)
+		res1 = util.Sum(qualities...)
 	}
 	if task != 1 {
 		maxGeodes := getMaxGeodes(blueprints[:util.Min(3, len(blueprints))], 32, !debug)

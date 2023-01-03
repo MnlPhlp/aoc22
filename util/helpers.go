@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"golang.org/x/exp/constraints"
@@ -32,7 +33,7 @@ func ReadInputUnittest(day int, test bool) string {
 	return ReadInput(day, test)
 }
 
-func Sum[T constraints.Ordered](arr []T) T {
+func Sum[T constraints.Ordered](arr ...T) T {
 	var sum T
 	for _, v := range arr {
 		sum += v
@@ -63,4 +64,12 @@ func Max[T constraints.Ordered](args ...T) T {
 		}
 	}
 	return args[max]
+}
+
+func ParseInt(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return i
 }
