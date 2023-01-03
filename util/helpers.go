@@ -80,3 +80,10 @@ func Abs[T constraints.Integer | constraints.Float](a T) T {
 	}
 	return a
 }
+
+func Sign[T constraints.Signed](a T) T {
+	if a < 0 {
+		return -1
+	}
+	return 1
+}
