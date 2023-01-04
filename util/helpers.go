@@ -19,10 +19,15 @@ func ReadInput(day int, test bool) string {
 	if err != nil {
 		panic(err)
 	}
+	inputStr := string(input)
 	if runtime.GOOS == "windows" {
-		return strings.ReplaceAll(string(input), "\r\n", "\n")
+		inputStr = strings.ReplaceAll(inputStr, "\r\n", "\n")
 	}
-	return string(input)
+	// remove trailing newline
+	if inputStr[len(inputStr)-1] == '\n' {
+		inputStr = inputStr[:len(inputStr)-1]
+	}
+	return inputStr
 }
 
 func ReadInputUnittest(day int, test bool) string {

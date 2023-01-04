@@ -47,7 +47,7 @@ func TestExample(t *testing.T) {
 }
 
 func TestParser(t *testing.T) {
-	expected := util.ReadInputUnittest(13, false)
+	expected := util.ReadInputUnittest(13, false) + "\n"
 	pairs := parseInput(expected)
 	text := ""
 	for _, pair := range pairs {
