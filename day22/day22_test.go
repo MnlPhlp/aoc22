@@ -28,3 +28,8 @@ func TestPart1(t *testing.T) {
 	grid, path := parseInput(input, false)
 	assert.Equal(t, 93226, part1(grid, path, false))
 }
+
+func TestPart2(t *testing.T) {
+	grid, path := parseInput(input, false)
+	assert.Equal(t, 37415, part2(grid, path, false))
+}

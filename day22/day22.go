@@ -32,33 +32,20 @@ func parseInput(input string, debug bool) ([][]byte, []move) {
 		fmt.Printf("Grid:\n%s\n", gridStr)
 		fmt.Println("Path:", pathStr)
 	}
-	// parse grid and add border of empty fields for wrap logic
-	maxLen := 0
-	grid = append(grid, []byte{EMPTY})
+	// parse grid
 	for y, line := range strings.Split(gridStr, "\n") {
-		y++ // skip empty border
-		grid = append(grid, []byte{EMPTY})
-		for _, c := range line {
+		grid = append(grid, make([]byte, len(line)))
+		for x, c := range line {
 			switch c {
 			case '#':
-				grid[y] = append(grid[y], BLOCKED)
+				grid[y][x] = BLOCKED
 			case '.':
-				grid[y] = append(grid[y], OPEN)
+				grid[y][x] = OPEN
 			default:
-				grid[y] = append(grid[y], EMPTY)
+				grid[y][x] = EMPTY
 			}
 		}
 		grid[y] = append(grid[y], EMPTY)
-		if len(grid[y]) > maxLen {
-			maxLen = len(grid[y])
-		}
-	}
-	grid = append(grid, []byte{EMPTY})
-	// fill all rows to same length
-	for y, row := range grid {
-		for i := len(row); i < maxLen; i++ {
-			grid[y] = append(grid[y], EMPTY)
-		}
 	}
 
 	// parse path
@@ -85,88 +72,6 @@ func parseInput(input string, debug bool) ([][]byte, []move) {
 
 	return grid, path
 }
-
-func calcPath(grid [][]byte, path []move, debug bool) []util.Pos3 {
-	moved := []util.Pos3{}
-	pos := util.Pos2{0, 0}
-	dir := RIGHT
-	// find first open tile of first row
-outer:
-	for y, row := range grid {
-		for x, c := range row {
-			if c == OPEN {
-				pos = util.Pos2{x, y}
-				break outer
-			}
-		}
-	}
-	if debug {
-		fmt.Println("Start pos:", pos)
-		fmt.Println("Start dir:", dir)
-		steps := 0
-		for _, m := range path {
-			steps += m.steps
-		}
-		fmt.Println("total steps:", steps)
-	}
-	moved = append(moved, util.Pos3{pos.X, pos.Y, dir})
-	// follow path
-	for i, m := range path {
-		move := util.Pos2{0, 0}
-		switch dir {
-		case RIGHT:
-			move = util.Pos2{1, 0}
-		case DOWN:
-			move = util.Pos2{0, 1}
-		case LEFT:
-			move = util.Pos2{-1, 0}
-		case UP:
-			move = util.Pos2{0, -1}
-		}
-		for i := 0; i < m.steps; i++ {
-			newPos := pos.Add(move)
-			// stop if blocked
-			if grid[newPos.Y][newPos.X] == BLOCKED {
-				break
-			}
-			// wrap around
-			if grid[newPos.Y][newPos.X] == EMPTY {
-				switch dir {
-				case RIGHT:
-					newPos.X = 0
-				case DOWN:
-					newPos.Y = 0
-				case LEFT:
-					newPos.X = len(grid[0]) - 1
-				case UP:
-					newPos.Y = len(grid) - 1
-				}
-				for grid[newPos.Y][newPos.X] == EMPTY {
-					newPos = newPos.Add(move)
-				}
-				if grid[newPos.Y][newPos.X] == BLOCKED {
-					break
-				}
-			}
-			// actually move
-			pos = newPos
-			if debug {
-				moved = append(moved, util.Pos3{pos.X, pos.Y, dir})
-			}
-		}
-		// do rotation if not in last move
-		if i != len(path)-1 {
-			if m.rotLeft {
-				dir = (dir + 3) % 4
-			} else {
-				dir = (dir + 1) % 4
-			}
-		}
-		moved = append(moved, util.Pos3{pos.X, pos.Y, dir})
-	}
-	return moved
-}
-
 func printPath(grid [][]byte, path []util.Pos3) {
 	visited := make(map[util.Pos2]int)
 	for _, p := range path {
@@ -192,15 +97,90 @@ func printPath(grid [][]byte, path []util.Pos3) {
 	}
 }
 
+func doMoves(grid [][]byte, moves []move, debug bool, wrapMap map[util.Pos2]util.Pos2) (util.Pos3, []util.Pos3) {
+	// find start cell
+	startx, starty := 0, 0
+	// find first open tile of first row
+	for x, c := range grid[0] {
+		if c == OPEN {
+			startx = x
+			break
+		}
+	}
+	// record moves in path
+	var wayPoints []util.Pos3
+	pos := util.Pos2{startx, starty}
+	dir := RIGHT
+	var next util.Pos2
+	for i, m := range moves {
+		// do steps
+		for j := 0; j < m.steps; j++ {
+			switch dir {
+			case RIGHT:
+				// right
+				next = findPos(grid, pos, util.Pos2{1, 0}, util.Pos2{0, pos.Y})
+			case DOWN:
+				// down
+				next = findPos(grid, pos, util.Pos2{0, 1}, util.Pos2{pos.X, 0})
+			case LEFT:
+				// left
+				next = findPos(grid, pos, util.Pos2{-1, 0}, util.Pos2{len(grid[pos.Y]) - 1, pos.Y})
+			case UP:
+				// up
+				next = findPos(grid, pos, util.Pos2{0, -1}, util.Pos2{pos.X, len(grid) - 1})
+
+			}
+			if next.X == pos.X && next.Y == pos.Y {
+				break
+			}
+			pos = next
+		}
+		// do rotation if not in last move
+		if i != len(moves)-1 {
+			if m.rotLeft {
+				dir = (dir + 3) % 4
+			} else {
+				dir = (dir + 1) % 4
+			}
+		}
+	}
+	return util.Pos3{pos.X, pos.Y, dir}, wayPoints
+
+}
+
+func findPos(grid [][]byte, start, move, wrap util.Pos2) util.Pos2 {
+	//  wrap around if needed
+	pos := start.Add(move)
+	if pos.Y < 0 || pos.Y >= len(grid) || pos.X < 0 || pos.X >= len(grid[pos.Y]) || grid[pos.Y][pos.X] == EMPTY {
+		// wrap around
+		pos = wrap
+		// move to next  cell
+		for pos.Y < 0 || pos.Y >= len(grid) || pos.X < 0 || pos.X >= len(grid[pos.Y]) || grid[pos.Y][pos.X] == EMPTY {
+			pos = pos.Add(move)
+		}
+	}
+
+	// check if next cell is blocked
+	if grid[pos.Y][pos.X] == BLOCKED {
+		return start
+	}
+	return pos
+}
+
 func part1(grid [][]byte, moves []move, debug bool) int {
-	path := calcPath(grid, moves, debug)
-	pos := path[len(path)-1]
-	ret := 1000*pos.Y + 4*pos.X + pos.Z
+	end, path := doMoves(grid, moves, debug, map[util.Pos2]util.Pos2{})
 	if debug {
 		printPath(grid, path)
-		fmt.Printf("Result 1: Row: %d, Col: %d, Dir: %d, Code: %d", pos.Y, pos.X, pos.Z, ret)
 	}
-	return ret
+	return 1000*(end.Y+1) + 4*(end.X+1) + end.Z
+}
+
+func part2(grid [][]byte, moves []move, debug bool) int {
+	end, path := doMoves(grid, moves, debug, map[util.Pos2]util.Pos2{})
+	if debug {
+		printPath(grid, path)
+	}
+	return 1000*(end.Y+1) + 4*(end.X+1) + end.Z
 }
 
 func Solve(input string, debug bool, task int) (string, string) {
@@ -214,7 +194,7 @@ func Solve(input string, debug bool, task int) (string, string) {
 		res1 = part1(grid, path, debug)
 	}
 	if task != 1 {
-
+		res2 = part2(grid, path, debug)
 	}
 	return fmt.Sprint(res1), fmt.Sprint(res2)
 }
