@@ -97,7 +97,7 @@ func printPath(grid [][]byte, path []util.Pos3) {
 	}
 }
 
-func doMoves(grid [][]byte, moves []move, debug bool, wrapMap map[util.Pos2]util.Pos2) (util.Pos3, []util.Pos3) {
+func doMoves(grid [][]byte, moves []move, debug bool, cube bool) (util.Pos3, []util.Pos3) {
 	// find start cell
 	startx, starty := 0, 0
 	// find first open tile of first row
@@ -111,29 +111,18 @@ func doMoves(grid [][]byte, moves []move, debug bool, wrapMap map[util.Pos2]util
 	var wayPoints []util.Pos3
 	pos := util.Pos2{startx, starty}
 	dir := RIGHT
-	var next util.Pos2
 	for i, m := range moves {
 		// do steps
 		for j := 0; j < m.steps; j++ {
-			switch dir {
-			case RIGHT:
-				// right
-				next = findPos(grid, pos, util.Pos2{1, 0}, util.Pos2{0, pos.Y})
-			case DOWN:
-				// down
-				next = findPos(grid, pos, util.Pos2{0, 1}, util.Pos2{pos.X, 0})
-			case LEFT:
-				// left
-				next = findPos(grid, pos, util.Pos2{-1, 0}, util.Pos2{len(grid[pos.Y]) - 1, pos.Y})
-			case UP:
-				// up
-				next = findPos(grid, pos, util.Pos2{0, -1}, util.Pos2{pos.X, len(grid) - 1})
-
-			}
+			next, nextDir := findPos(grid, pos, dir, cube)
 			if next.X == pos.X && next.Y == pos.Y {
 				break
 			}
 			pos = next
+			dir = nextDir
+			if debug {
+				wayPoints = append(wayPoints, util.Pos3{pos.X, pos.Y, dir})
+			}
 		}
 		// do rotation if not in last move
 		if i != len(moves)-1 {
@@ -144,16 +133,135 @@ func doMoves(grid [][]byte, moves []move, debug bool, wrapMap map[util.Pos2]util
 			}
 		}
 	}
-	return util.Pos3{pos.X, pos.Y, dir}, wayPoints
-
+	return util.Pos3{pos.X, pos.Y, int(dir)}, wayPoints
 }
 
-func findPos(grid [][]byte, start, move, wrap util.Pos2) util.Pos2 {
+func getMove(dir int) util.Pos2 {
+	switch dir {
+	case RIGHT:
+		return util.Pos2{1, 0}
+	case DOWN:
+		return util.Pos2{0, 1}
+	case LEFT:
+		return util.Pos2{-1, 0}
+	case UP:
+		return util.Pos2{0, -1}
+	}
+	panic("Unknown direction: " + fmt.Sprint(dir))
+}
+
+func getCubeFace(pos util.Pos2) int {
+	// returns number of the face of the cube
+	// numbers on the input are defined as follows:
+	//   0 1
+	//   2
+	// 3 4
+	// 5
+	if pos.Y < 50 {
+		// to row
+		if pos.X < 100 {
+			// left
+			return 0
+		} else {
+			// right
+			return 1
+		}
+	} else if pos.Y < 100 {
+		// second row
+		return 2
+	} else if pos.Y < 150 {
+		// third row
+		if pos.X < 50 {
+			// left
+			return 3
+		} else {
+			// right
+			return 4
+		}
+	} else {
+		// fourth row
+		return 5
+	}
+}
+
+func getWrap(grid [][]byte, pos util.Pos2, dir int, cube bool) util.Pos3 {
+	if !cube {
+		switch dir {
+		case RIGHT:
+			return util.Pos3{0, pos.Y, dir}
+		case DOWN:
+			return util.Pos3{pos.X, 0, dir}
+		case LEFT:
+			return util.Pos3{len(grid[pos.Y]) - 1, pos.Y, dir}
+		case UP:
+			return util.Pos3{pos.X, len(grid) - 1, dir}
+		}
+		panic("Unknown direction: " + fmt.Sprint(dir))
+	} else {
+		face := getCubeFace(pos)
+		// feces are defined as follows (for my input):
+		//   0 1
+		//   2
+		// 3 4
+		// 5
+		switch dir {
+		case RIGHT:
+			switch face {
+			case 1:
+				return util.Pos3{99, 149 - pos.Y, LEFT} // move to face 4 and rotate 180
+			case 2:
+				return util.Pos3{pos.Y + 50, 49, UP} // move to face 1 and rotate -90 (or 270)
+			case 4:
+				return util.Pos3{149, 49 - (pos.Y - 100), LEFT} // move to face 1 and rotate 180
+			case 5:
+				return util.Pos3{pos.Y - 100, 149, UP} // move to face 4 and rotate -90
+			}
+		case DOWN:
+			switch face {
+			case 1:
+				return util.Pos3{99, pos.X - 50, LEFT} // move to face 2 and rotate 90
+			case 4:
+				return util.Pos3{49, pos.X + 100, LEFT} // move to face 5 and rotate 90
+			case 5:
+				return util.Pos3{pos.X + 100, 0, DOWN} // move to face 1 and rotate 0
+			}
+		case LEFT:
+			switch face {
+			case 0:
+				return util.Pos3{0, 149 - pos.Y, RIGHT} // move to face 3 and rotate 180
+			case 2:
+				return util.Pos3{pos.Y - 50, 100, DOWN} // move to face 3 and rotate -90 (or 270)
+			case 3:
+				return util.Pos3{50, 49 - (pos.Y - 100), RIGHT} // move to face 0 and rotate 180
+			case 5:
+				return util.Pos3{pos.Y - 100, 0, DOWN} // move to face 0 and rotate -90
+			}
+		case UP:
+			switch face {
+			case 0:
+				return util.Pos3{0, pos.X + 100, RIGHT} // move to face 5 and rotate 90
+			case 1:
+				return util.Pos3{pos.X - 100, 199, UP} // move to face 5 and rotate 0
+			case 3:
+				return util.Pos3{50, pos.X + 50, RIGHT} // move to face 2 and rotate 90
+			}
+		}
+		// no wrap
+		panic(fmt.Sprintf("No wrap for face %d, pos %v, dir %d", face, pos, dir))
+	}
+}
+
+func findPos(grid [][]byte, start util.Pos2, dirStart int, cube bool) (util.Pos2, int) {
+	move := getMove(dirStart)
 	//  wrap around if needed
 	pos := start.Add(move)
+	dir := dirStart
 	if pos.Y < 0 || pos.Y >= len(grid) || pos.X < 0 || pos.X >= len(grid[pos.Y]) || grid[pos.Y][pos.X] == EMPTY {
 		// wrap around
-		pos = wrap
+		wrap := getWrap(grid, start, dirStart, cube)
+		pos.X = wrap.X
+		pos.Y = wrap.Y
+		dir = wrap.Z
 		// move to next  cell
 		for pos.Y < 0 || pos.Y >= len(grid) || pos.X < 0 || pos.X >= len(grid[pos.Y]) || grid[pos.Y][pos.X] == EMPTY {
 			pos = pos.Add(move)
@@ -162,13 +270,13 @@ func findPos(grid [][]byte, start, move, wrap util.Pos2) util.Pos2 {
 
 	// check if next cell is blocked
 	if grid[pos.Y][pos.X] == BLOCKED {
-		return start
+		return start, dirStart
 	}
-	return pos
+	return pos, dir
 }
 
 func part1(grid [][]byte, moves []move, debug bool) int {
-	end, path := doMoves(grid, moves, debug, map[util.Pos2]util.Pos2{})
+	end, path := doMoves(grid, moves, debug, false)
 	if debug {
 		printPath(grid, path)
 	}
@@ -176,7 +284,7 @@ func part1(grid [][]byte, moves []move, debug bool) int {
 }
 
 func part2(grid [][]byte, moves []move, debug bool) int {
-	end, path := doMoves(grid, moves, debug, map[util.Pos2]util.Pos2{})
+	end, path := doMoves(grid, moves, debug, true)
 	if debug {
 		printPath(grid, path)
 	}
