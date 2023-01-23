@@ -6,15 +6,15 @@ import (
 )
 
 func findDuplicate(r string) byte {
-	seen := make(map[rune]bool)
+	seen := uint64(0)
 	comp1 := r[:len(r)/2]
 	comp2 := r[len(r)/2:]
-	for _, c := range comp1 {
-		seen[c] = true
-	}
-	for _, c := range comp2 {
-		if seen[c] {
-			return byte(c)
+	for i := 0; i < len(r)/2; i++ {
+		// set bit for character in rucksack 1
+		seen |= 1 << (comp1[i] - 65)
+		// check if character bit for rucksack 2 element is set
+		if seen&uint64(comp2[i]-65) > 0 {
+			return byte(comp1[i])
 		}
 	}
 	return 0
@@ -30,18 +30,18 @@ func getPriority(duplicate byte) int {
 
 func findBadges(rucksacks []string) []byte {
 	badges := make([]byte, len(rucksacks)/3)
-	seen := make([]map[rune]bool, 3)
+	seen := make([]uint64, 3)
+	// loop over groups
 	for i := 0; i < len(rucksacks); i += 3 {
-		// create set of seen items
+		// create set of seen items for each rucksack in one group
 		for j := 0; j < 3; j++ {
-			seen[j] = make(map[rune]bool)
 			for _, c := range rucksacks[i+j] {
-				seen[j][c] = true
+				seen[j] |= 1 << (c - 65)
 			}
 		}
-		// store badge
-		for r, _ := range seen[2] {
-			if seen[0][r] && seen[1][r] {
+		// search bit (character) set in all 3 rucksacks
+		for r := 0; r < 64; r++ {
+			if ((1 << r) & seen[0] & seen[1] & seen[2]) > 0 {
 				badges[i/3] = byte(r)
 				break
 			}
@@ -52,8 +52,9 @@ func findBadges(rucksacks []string) []byte {
 
 func Solve(input string, test bool, task int) (string, string) {
 	rucksacks := strings.Split(string(input), "\n")
-	// remove empty line
-	rucksacks = rucksacks[:len(rucksacks)-1]
+	if test {
+		fmt.Println("Rucksacks:", rucksacks)
+	}
 	res1, res2 := "", ""
 	if task != 2 {
 		sum := 0

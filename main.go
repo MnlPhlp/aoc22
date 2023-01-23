@@ -31,6 +31,7 @@ import (
 	"github.com/mnlphlp/aoc22/day20"
 	"github.com/mnlphlp/aoc22/day21"
 	"github.com/mnlphlp/aoc22/day22"
+	"github.com/mnlphlp/aoc22/day23"
 	"github.com/mnlphlp/aoc22/util"
 )
 
@@ -57,6 +58,7 @@ var dayFuncs = [...]func(string, bool, int) (string, string){
 	day20.Solve,
 	day21.Solve,
 	day22.Solve,
+	day23.Solve,
 }
 
 func capLength(str string, length int) string {

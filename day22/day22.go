@@ -75,7 +75,7 @@ func parseInput(input string, debug bool) ([][]byte, []move) {
 func printPath(grid [][]byte, path []util.Pos3) {
 	visited := make(map[util.Pos2]int)
 	for _, p := range path {
-		visited[util.Pos2{p.X, p.Y}] = p.Z
+		visited[util.Pos2{X: p.X, Y: p.Y}] = p.Z
 	}
 	chars := []string{">", "v", "<", "^"}
 	for y, row := range grid {
@@ -85,7 +85,7 @@ func printPath(grid [][]byte, path []util.Pos3) {
 			} else if c == EMPTY {
 				fmt.Print(" ")
 			} else {
-				p := util.Pos2{x, y}
+				p := util.Pos2{X: x, Y: y}
 				if char, ok := visited[p]; ok {
 					fmt.Print(chars[char])
 				} else {
@@ -99,17 +99,17 @@ func printPath(grid [][]byte, path []util.Pos3) {
 
 func doMoves(grid [][]byte, moves []move, debug bool, cube bool) (util.Pos3, []util.Pos3) {
 	// find start cell
-	startx, starty := 0, 0
+	startX, startY := 0, 0
 	// find first open tile of first row
 	for x, c := range grid[0] {
 		if c == OPEN {
-			startx = x
+			startX = x
 			break
 		}
 	}
 	// record moves in path
 	var wayPoints []util.Pos3
-	pos := util.Pos2{startx, starty}
+	pos := util.Pos2{X: startX, Y: startY}
 	dir := RIGHT
 	for i, m := range moves {
 		// do steps
@@ -121,7 +121,7 @@ func doMoves(grid [][]byte, moves []move, debug bool, cube bool) (util.Pos3, []u
 			pos = next
 			dir = nextDir
 			if debug {
-				wayPoints = append(wayPoints, util.Pos3{pos.X, pos.Y, dir})
+				wayPoints = append(wayPoints, util.Pos3{X: pos.X, Y: pos.Y, Z: dir})
 			}
 		}
 		// do rotation if not in last move
@@ -133,19 +133,19 @@ func doMoves(grid [][]byte, moves []move, debug bool, cube bool) (util.Pos3, []u
 			}
 		}
 	}
-	return util.Pos3{pos.X, pos.Y, int(dir)}, wayPoints
+	return util.Pos3{X: pos.X, Y: pos.Y, Z: int(dir)}, wayPoints
 }
 
 func getMove(dir int) util.Pos2 {
 	switch dir {
 	case RIGHT:
-		return util.Pos2{1, 0}
+		return util.Pos2{X: 1, Y: 0}
 	case DOWN:
-		return util.Pos2{0, 1}
+		return util.Pos2{X: 0, Y: 1}
 	case LEFT:
-		return util.Pos2{-1, 0}
+		return util.Pos2{X: -1, Y: 0}
 	case UP:
-		return util.Pos2{0, -1}
+		return util.Pos2{X: 0, Y: -1}
 	}
 	panic("Unknown direction: " + fmt.Sprint(dir))
 }
@@ -188,18 +188,18 @@ func getWrap(grid [][]byte, pos util.Pos2, dir int, cube bool) util.Pos3 {
 	if !cube {
 		switch dir {
 		case RIGHT:
-			return util.Pos3{0, pos.Y, dir}
+			return util.Pos3{X: 0, Y: pos.Y, Z: dir}
 		case DOWN:
-			return util.Pos3{pos.X, 0, dir}
+			return util.Pos3{X: pos.X, Y: 0, Z: dir}
 		case LEFT:
-			return util.Pos3{len(grid[pos.Y]) - 1, pos.Y, dir}
+			return util.Pos3{X: len(grid[pos.Y]) - 1, Y: pos.Y, Z: dir}
 		case UP:
-			return util.Pos3{pos.X, len(grid) - 1, dir}
+			return util.Pos3{X: pos.X, Y: len(grid) - 1, Z: dir}
 		}
 		panic("Unknown direction: " + fmt.Sprint(dir))
 	} else {
 		face := getCubeFace(pos)
-		// feces are defined as follows (for my input):
+		// faces are defined as follows (for my input):
 		//   0 1
 		//   2
 		// 3 4
@@ -208,46 +208,46 @@ func getWrap(grid [][]byte, pos util.Pos2, dir int, cube bool) util.Pos3 {
 		case RIGHT:
 			switch face {
 			case 1:
-				return util.Pos3{99, 149 - pos.Y, LEFT} // move to face 4 and rotate 180
+				return util.Pos3{X: 99, Y: 149 - pos.Y, Z: LEFT} // move to face 4 and rotate 180
 			case 2:
-				return util.Pos3{pos.Y + 50, 49, UP} // move to face 1 and rotate -90 (or 270)
+				return util.Pos3{X: pos.Y + 50, Y: 49, Z: UP} // move to face 1 and rotate -90 (or 270)
 			case 4:
-				return util.Pos3{149, 49 - (pos.Y - 100), LEFT} // move to face 1 and rotate 180
+				return util.Pos3{X: 149, Y: 49 - (pos.Y - 100), Z: LEFT} // move to face 1 and rotate 180
 			case 5:
-				return util.Pos3{pos.Y - 100, 149, UP} // move to face 4 and rotate -90
+				return util.Pos3{X: pos.Y - 100, Y: 149, Z: UP} // move to face 4 and rotate -90
 			}
 		case DOWN:
 			switch face {
 			case 1:
-				return util.Pos3{99, pos.X - 50, LEFT} // move to face 2 and rotate 90
+				return util.Pos3{X: 99, Y: pos.X - 50, Z: LEFT} // move to face 2 and rotate 90
 			case 4:
-				return util.Pos3{49, pos.X + 100, LEFT} // move to face 5 and rotate 90
+				return util.Pos3{X: 49, Y: pos.X + 100, Z: LEFT} // move to face 5 and rotate 90
 			case 5:
-				return util.Pos3{pos.X + 100, 0, DOWN} // move to face 1 and rotate 0
+				return util.Pos3{X: pos.X + 100, Y: 0, Z: DOWN} // move to face 1 and rotate 0
 			}
 		case LEFT:
 			switch face {
 			case 0:
-				return util.Pos3{0, 149 - pos.Y, RIGHT} // move to face 3 and rotate 180
+				return util.Pos3{X: 0, Y: 149 - pos.Y, Z: RIGHT} // move to face 3 and rotate 180
 			case 2:
-				return util.Pos3{pos.Y - 50, 100, DOWN} // move to face 3 and rotate -90 (or 270)
+				return util.Pos3{X: pos.Y - 50, Y: 100, Z: DOWN} // move to face 3 and rotate -90 (or 270)
 			case 3:
-				return util.Pos3{50, 49 - (pos.Y - 100), RIGHT} // move to face 0 and rotate 180
+				return util.Pos3{X: 50, Y: 49 - (pos.Y - 100), Z: RIGHT} // move to face 0 and rotate 180
 			case 5:
-				return util.Pos3{pos.Y - 100, 0, DOWN} // move to face 0 and rotate -90
+				return util.Pos3{X: pos.Y - 100, Y: 0, Z: DOWN} // move to face 0 and rotate -90
 			}
 		case UP:
 			switch face {
 			case 0:
-				return util.Pos3{0, pos.X + 100, RIGHT} // move to face 5 and rotate 90
+				return util.Pos3{X: 0, Y: pos.X + 100, Z: RIGHT} // move to face 5 and rotate 90
 			case 1:
-				return util.Pos3{pos.X - 100, 199, UP} // move to face 5 and rotate 0
+				return util.Pos3{X: pos.X - 100, Y: 199, Z: UP} // move to face 5 and rotate 0
 			case 3:
-				return util.Pos3{50, pos.X + 50, RIGHT} // move to face 2 and rotate 90
+				return util.Pos3{X: 50, Y: pos.X + 50, Z: RIGHT} // move to face 2 and rotate 90
 			}
 		}
 		// no wrap
-		panic(fmt.Sprintf("No wrap for face %d, pos %v, dir %d", face, pos, dir))
+		return util.Pos3{X: pos.X, Y: pos.Y, Z: dir}
 	}
 }
 
@@ -284,6 +284,12 @@ func part1(grid [][]byte, moves []move, debug bool) int {
 }
 
 func part2(grid [][]byte, moves []move, debug bool) int {
+	// part two only works correctly for the real input, not the test
+	// because of the wrapping in the getWrap function
+	if len(grid) != 200 {
+		fmt.Println("Part 2 only works for the real input, not the test input")
+		return 0
+	}
 	end, path := doMoves(grid, moves, debug, true)
 	if debug {
 		printPath(grid, path)
