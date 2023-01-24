@@ -5,9 +5,14 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mnlphlp/aoc22/util"
 )
+
+var timing struct {
+	insert, contains, canMove, nextMove, hash, remove time.Duration
+}
 
 type Grid []util.Pos2
 
@@ -17,10 +22,14 @@ func (g Grid) IndexOf(p util.Pos2) (int, bool) {
 	})
 }
 func (g Grid) Contains(p util.Pos2) bool {
+	start := time.Now()
+	defer func() { timing.contains += time.Since(start) }()
 	_, found := g.IndexOf(p)
 	return found
 }
 func (g Grid) Insert(p util.Pos2) Grid {
+	start := time.Now()
+	defer func() { timing.insert += time.Since(start) }()
 	if len(g) == 0 {
 		return append(g, p)
 	}
@@ -31,6 +40,8 @@ func (g Grid) Insert(p util.Pos2) Grid {
 	return g
 }
 func (g Grid) Remove(p util.Pos2) Grid {
+	start := time.Now()
+	defer func() { timing.remove += time.Since(start) }()
 	i, _ := g.IndexOf(p)
 	return append(g[:i], g[i+1:]...)
 }
@@ -56,6 +67,8 @@ func (g Grid) String() string {
 }
 
 func (g Grid) Hash() string {
+	start := time.Now()
+	defer func() { timing.hash += time.Since(start) }()
 	positions := make([]int, 0, len(g))
 	for _, p := range g {
 		positions = append(positions, p.X<<32+p.Y)
@@ -94,6 +107,8 @@ var Directions = []util.Pos2{
 }
 
 func canMove(e util.Pos2, elves Grid) bool {
+	start := time.Now()
+	defer func() { timing.canMove += time.Since(start) }()
 	for x := -1; x <= 1; x++ {
 		for y := -1; y <= 1; y++ {
 			if x == 0 && y == 0 {
@@ -109,6 +124,8 @@ func canMove(e util.Pos2, elves Grid) bool {
 }
 
 func nextPos(e util.Pos2, elves Grid, startDir int) (util.Pos2, bool) {
+	start := time.Now()
+	defer func() { timing.nextMove += time.Since(start) }()
 	// check all 4 directions
 	for i := 0; i < 4; i++ {
 		dir := (startDir + i) % 4
@@ -216,5 +233,12 @@ func Solve(input string, debug bool, task int) (string, string) {
 		}
 		res2 += part2(grid, startDir, debug)
 	}
+	fmt.Println("canMove: ", timing.canMove)
+	fmt.Println("contains: ", timing.contains)
+	fmt.Println("hash: ", timing.hash)
+	fmt.Println("insert: ", timing.insert)
+	fmt.Println("nextMove: ", timing.nextMove)
+	fmt.Println("remove: ", timing.remove)
+
 	return strconv.Itoa(res1), strconv.Itoa(res2)
 }
