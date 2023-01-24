@@ -2,6 +2,7 @@ package day23
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -16,18 +17,27 @@ func (g Grid) String() string {
 		min = util.Pos2{X: util.Min(min.X, p.X), Y: util.Min(min.Y, p.Y)}
 		max = util.Pos2{X: util.Max(max.X, p.X), Y: util.Max(max.Y, p.Y)}
 	}
-	s := ""
+	s := fmt.Sprintf("min: %d,%d max: %d,%d\n", min.X, min.Y, max.X, max.Y)
 	for y := min.Y; y <= max.Y; y++ {
 		for x := min.X; x <= max.X; x++ {
 			if _, elve := g[util.Pos2{x, y}]; elve {
 				s += "#"
 			} else {
-				s += "."
+				s += "O"
 			}
 		}
 		s += "\n"
 	}
 	return s
+}
+
+func (g Grid) Hash() string {
+	positions := make([]int, 0, len(g))
+	for p := range g {
+		positions = append(positions, p.X<<32+p.Y)
+	}
+	sort.Ints(positions)
+	return fmt.Sprint(positions)
 }
 
 var occupied struct{}
@@ -62,6 +72,10 @@ var Directions = []util.Pos2{
 func canMove(e util.Pos2, elves Grid) bool {
 	for x := -1; x <= 1; x++ {
 		for y := -1; y <= 1; y++ {
+			if x == 0 && y == 0 {
+				// skip own field
+				continue
+			}
 			if _, found := elves[e.Add(util.Pos2{x, y})]; found {
 				return true
 			}
@@ -87,12 +101,18 @@ func nextPos(e util.Pos2, elves Grid, startDir int) (util.Pos2, bool) {
 	return util.Pos2{}, false
 }
 
-func move(elves Grid, rounds int, debug bool) Grid {
+func move(elves Grid, rounds int, debug bool) (Grid, int) {
 	if debug {
 		fmt.Println(elves)
 	}
 	startDir := North
-	for i := 0; i < rounds; i++ {
+	lastHash := ""
+	for i := 0; i < rounds || rounds == 0; i++ {
+		hash := elves.Hash()
+		if hash == lastHash {
+			return elves, i
+		}
+		lastHash = hash
 		proposed := make(map[util.Pos2]util.Pos2)
 		conflicts := make([]util.Pos2, 0)
 		for e := range elves {
@@ -112,16 +132,19 @@ func move(elves Grid, rounds int, debug bool) Grid {
 		for _, conflict := range conflicts {
 			delete(proposed, conflict)
 		}
-		for new, old := range proposed {
+		for _, old := range proposed {
 			delete(elves, old)
+		}
+		for new := range proposed {
 			elves[new] = occupied
 		}
 		if debug {
+			fmt.Printf("Round %d: %d\n", i+1, countEmpty(elves))
 			fmt.Println(elves)
 		}
 		startDir = (startDir + 1) % 4
 	}
-	return elves
+	return elves, rounds
 }
 
 func countEmpty(g Grid) int {
@@ -134,8 +157,13 @@ func countEmpty(g Grid) int {
 }
 
 func part1(grid Grid, debug bool) int {
-	grid = move(grid, 10, debug)
+	grid, _ = move(grid, 10, debug)
 	return countEmpty(grid)
+}
+
+func part2(grid Grid, debug bool) int {
+	_, lastMove := move(grid, 0, debug)
+	return lastMove
 }
 
 func parseInput(input string) Grid {
@@ -155,6 +183,9 @@ func Solve(input string, debug bool, task int) (string, string) {
 	grid := parseInput(input)
 	if task != 2 {
 		res1 = part1(grid, debug)
+	}
+	if task != 1 {
+		res2 = part2(grid, debug)
 	}
 	return strconv.Itoa(res1), strconv.Itoa(res2)
 }
