@@ -9,18 +9,42 @@ import (
 	"github.com/mnlphlp/aoc22/util"
 )
 
-type Grid map[util.Pos2]struct{}
+type Grid []util.Pos2
+
+func (g Grid) IndexOf(p util.Pos2) (int, bool) {
+	return sort.Find(len(g), func(i int) int {
+		return p.Comp(g[i])
+	})
+}
+func (g Grid) Contains(p util.Pos2) bool {
+	_, found := g.IndexOf(p)
+	return found
+}
+func (g Grid) Insert(p util.Pos2) Grid {
+	if len(g) == 0 {
+		return append(g, p)
+	}
+	i, _ := g.IndexOf(p)
+	g = append(g, util.Pos2{})
+	copy(g[i+1:], g[i:])
+	g[i] = p
+	return g
+}
+func (g Grid) Remove(p util.Pos2) Grid {
+	i, _ := g.IndexOf(p)
+	return append(g[:i], g[i+1:]...)
+}
 
 func (g Grid) String() string {
 	min, max := util.Pos2{X: 1 << 62, Y: 1 << 62}, util.Pos2{X: -(1 << 62), Y: -(1 << 62)}
-	for p := range g {
+	for _, p := range g {
 		min = util.Pos2{X: util.Min(min.X, p.X), Y: util.Min(min.Y, p.Y)}
 		max = util.Pos2{X: util.Max(max.X, p.X), Y: util.Max(max.Y, p.Y)}
 	}
 	s := fmt.Sprintf("min: %d,%d max: %d,%d\n", min.X, min.Y, max.X, max.Y)
 	for y := min.Y; y <= max.Y; y++ {
 		for x := min.X; x <= max.X; x++ {
-			if _, elve := g[util.Pos2{x, y}]; elve {
+			if g.Contains(util.Pos2{x, y}) {
 				s += "#"
 			} else {
 				s += "O"
@@ -33,7 +57,7 @@ func (g Grid) String() string {
 
 func (g Grid) Hash() string {
 	positions := make([]int, 0, len(g))
-	for p := range g {
+	for _, p := range g {
 		positions = append(positions, p.X<<32+p.Y)
 	}
 	sort.Ints(positions)
@@ -76,7 +100,7 @@ func canMove(e util.Pos2, elves Grid) bool {
 				// skip own field
 				continue
 			}
-			if _, found := elves[e.Add(util.Pos2{x, y})]; found {
+			if elves.Contains(e.Add(util.Pos2{x, y})) {
 				return true
 			}
 		}
@@ -90,7 +114,7 @@ func nextPos(e util.Pos2, elves Grid, startDir int) (util.Pos2, bool) {
 		dir := (startDir + i) % 4
 		ok := true
 		for _, d := range DirectionGroups[dir] {
-			if _, found := elves[e.Add(d)]; found {
+			if elves.Contains(e.Add(d)) {
 				ok = false
 			}
 		}
@@ -114,7 +138,7 @@ func move(elves Grid, rounds int, startDir int, debug bool) (Grid, int) {
 		lastHash = hash
 		proposed := make(map[util.Pos2]util.Pos2)
 		conflicts := make([]util.Pos2, 0)
-		for e := range elves {
+		for _, e := range elves {
 			if !canMove(e, elves) {
 				continue
 			}
@@ -132,10 +156,10 @@ func move(elves Grid, rounds int, startDir int, debug bool) (Grid, int) {
 			delete(proposed, conflict)
 		}
 		for _, old := range proposed {
-			delete(elves, old)
+			elves = elves.Remove(old)
 		}
 		for new := range proposed {
-			elves[new] = occupied
+			elves = elves.Insert(new)
 		}
 		if debug {
 			fmt.Printf("Round %d: %d\n", i+1, countEmpty(elves))
@@ -148,7 +172,7 @@ func move(elves Grid, rounds int, startDir int, debug bool) (Grid, int) {
 
 func countEmpty(g Grid) int {
 	min, max := util.Pos2{X: 1 << 62, Y: 1 << 62}, util.Pos2{X: -(1 << 62), Y: -(1 << 62)}
-	for p := range g {
+	for _, p := range g {
 		min = util.Pos2{X: util.Min(min.X, p.X), Y: util.Min(min.Y, p.Y)}
 		max = util.Pos2{X: util.Max(max.X, p.X), Y: util.Max(max.Y, p.Y)}
 	}
@@ -170,7 +194,7 @@ func parseInput(input string) Grid {
 	for y, l := range strings.Split(input, "\n") {
 		for x, c := range l {
 			if c == '#' {
-				g[util.Pos2{X: x, Y: y}] = occupied
+				g = g.Insert(util.Pos2{X: x, Y: y})
 			}
 		}
 	}

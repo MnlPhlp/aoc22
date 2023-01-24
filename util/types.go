@@ -24,6 +24,15 @@ func (p *Pos2) Move(m Move) {
 	p.X += m.X
 	p.Y += m.Y
 }
+func (p1 Pos2) Comp(p2 Pos2) int {
+	if p1.X < p2.X {
+		return -1
+	}
+	if p1.X > p2.X {
+		return 1
+	}
+	return p1.Y - p2.Y
+}
 
 type Move Pos2
 
