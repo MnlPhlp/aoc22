@@ -101,11 +101,10 @@ func nextPos(e util.Pos2, elves Grid, startDir int) (util.Pos2, bool) {
 	return util.Pos2{}, false
 }
 
-func move(elves Grid, rounds int, debug bool) (Grid, int) {
+func move(elves Grid, rounds int, startDir int, debug bool) (Grid, int) {
 	if debug {
 		fmt.Println(elves)
 	}
-	startDir := North
 	lastHash := ""
 	for i := 0; i < rounds || rounds == 0; i++ {
 		hash := elves.Hash()
@@ -157,12 +156,12 @@ func countEmpty(g Grid) int {
 }
 
 func part1(grid Grid, debug bool) int {
-	grid, _ = move(grid, 10, debug)
+	grid, _ = move(grid, 10, North, debug)
 	return countEmpty(grid)
 }
 
-func part2(grid Grid, debug bool) int {
-	_, lastMove := move(grid, 0, debug)
+func part2(grid Grid, startDir int, debug bool) int {
+	_, lastMove := move(grid, 0, startDir, debug)
 	return lastMove
 }
 
@@ -185,7 +184,13 @@ func Solve(input string, debug bool, task int) (string, string) {
 		res1 = part1(grid, debug)
 	}
 	if task != 1 {
-		res2 = part2(grid, debug)
+		// if part one already ran continue from that state
+		startDir := North
+		if task == 0 {
+			startDir = (startDir + 10) % 4
+			res2 = 10
+		}
+		res2 += part2(grid, startDir, debug)
 	}
 	return strconv.Itoa(res1), strconv.Itoa(res2)
 }
