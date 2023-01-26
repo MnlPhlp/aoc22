@@ -7,8 +7,20 @@ import (
 	"github.com/mnlphlp/aoc22/util"
 )
 
+const TIMING_ACTIVE = false
+
+type Stat struct {
+	Time  time.Duration
+	Calls int
+}
+
+func (s *Stat) Add(t time.Duration) {
+	s.Calls++
+	s.Time += t
+}
+
 var Timing struct {
-	Insert, Contains, CanMove, NextMove, Hash, Remove time.Duration
+	Insert, Contains, CanMove, NextMove, Hash, Remove Stat
 }
 
 type Grid struct {
@@ -18,16 +30,20 @@ type Grid struct {
 }
 
 func (g Grid) Contains(p util.Pos2) bool {
-	start := time.Now()
-	defer func() { Timing.Contains += time.Since(start) }()
+	if TIMING_ACTIVE {
+		start := time.Now()
+		defer func() { Timing.Contains.Add(time.Since(start)) }()
+	}
 	p.X += g.offsetX
 	p.Y += g.offsetY
 	return p.X >= 0 && p.Y >= 0 && p.X < len(g.field) && p.Y < len(g.field[p.X]) && g.field[p.X][p.Y]
 }
 
 func (g Grid) Insert(p util.Pos2) Grid {
-	start := time.Now()
-	defer func() { Timing.Insert += time.Since(start) }()
+	if TIMING_ACTIVE {
+		start := time.Now()
+		defer func() { Timing.Insert.Add(time.Since(start)) }()
+	}
 	if diff := -(p.X + g.offsetX); diff > 0 {
 		g.offsetX += diff
 		for i := 0; i < diff; i++ {
@@ -69,8 +85,10 @@ func (g Grid) Insert(p util.Pos2) Grid {
 	return g
 }
 func (g Grid) Remove(p util.Pos2) Grid {
-	start := time.Now()
-	defer func() { Timing.Remove += time.Since(start) }()
+	if TIMING_ACTIVE {
+		start := time.Now()
+		defer func() { Timing.Remove.Add(time.Since(start)) }()
+	}
 	g.field[p.X+g.offsetX][p.Y+g.offsetY] = false
 	return g
 }
@@ -111,8 +129,6 @@ func (g Grid) ForEach(f func(util.Pos2)) {
 type GridHash []int
 
 func (h1 GridHash) Equals(h2 GridHash) bool {
-	start := time.Now()
-	defer func() { Timing.Hash += time.Since(start) }()
 	if len(h1) != len(h2) {
 		return false
 	}
@@ -125,21 +141,27 @@ func (h1 GridHash) Equals(h2 GridHash) bool {
 }
 
 func (g Grid) Hash() GridHash {
-	start := time.Now()
-	defer func() { Timing.Hash += time.Since(start) }()
+	if TIMING_ACTIVE {
+		start := time.Now()
+		defer func() { Timing.Hash.Add(time.Since(start)) }()
+	}
 	positions := make([]int, 0)
 	x := 0
 	for x = 0; x < len(g.field); x++ {
 		for y := 0; y < len(g.field[x]); y++ {
-			positions = append(positions, x<<32+y)
+			if g.field[x][y] {
+				positions = append(positions, x<<32+y)
+			}
 		}
 	}
 	return positions
 }
 
 func (g Grid) HasNeighbor(p util.Pos2) bool {
-	start := time.Now()
-	defer func() { Timing.CanMove += time.Since(start) }()
+	if TIMING_ACTIVE {
+		start := time.Now()
+		defer func() { Timing.CanMove.Add(time.Since(start)) }()
+	}
 	p.X += g.offsetX
 	p.Y += g.offsetY
 	for x := -1; x <= 1; x++ {
@@ -176,8 +198,10 @@ var DirectionGroups = [][]util.Pos2{
 }
 
 func (g Grid) NextPos(p util.Pos2, startDir int) (util.Pos2, bool) {
-	start := time.Now()
-	defer func() { Timing.NextMove += time.Since(start) }()
+	if TIMING_ACTIVE {
+		start := time.Now()
+		defer func() { Timing.NextMove.Add(time.Since(start)) }()
+	}
 	p.X += g.offsetX
 	p.Y += g.offsetY
 	// check all 4 directions

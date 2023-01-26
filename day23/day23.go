@@ -97,12 +97,14 @@ func Solve(input string, debug bool, task int) (string, string) {
 		}
 		res2 += part2(g, startDir, debug)
 	}
-	fmt.Println("canMove: ", grid.Timing.CanMove)
-	fmt.Println("contains: ", grid.Timing.Contains)
-	fmt.Println("hash: ", grid.Timing.Hash)
-	fmt.Println("insert: ", grid.Timing.Insert)
-	fmt.Println("nextMove: ", grid.Timing.NextMove)
-	fmt.Println("remove: ", grid.Timing.Remove)
+	if grid.TIMING_ACTIVE {
+		fmt.Println("canMove: ", grid.Timing.CanMove)
+		fmt.Println("contains: ", grid.Timing.Contains)
+		fmt.Println("hash: ", grid.Timing.Hash)
+		fmt.Println("insert: ", grid.Timing.Insert)
+		fmt.Println("nextMove: ", grid.Timing.NextMove)
+		fmt.Println("remove: ", grid.Timing.Remove)
+	}
 
 	return strconv.Itoa(res1), strconv.Itoa(res2)
 }
