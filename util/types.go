@@ -14,7 +14,9 @@ func MaxPos(p1, p2 Pos3) Pos3 {
 }
 
 func (p Pos2) Add(m Pos2) Pos2 {
-	return Pos2{p.X + m.X, p.Y + m.Y}
+	p.X += m.X
+	p.Y += m.Y
+	return p
 }
 func (p Pos2) Sub(m Pos2) Pos2 {
 	return Pos2{p.X - m.X, p.Y - m.Y}
