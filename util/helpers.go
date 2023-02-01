@@ -92,3 +92,21 @@ func Sign[T constraints.Signed](a T) T {
 	}
 	return 1
 }
+
+func Contains[T comparable](arr []T, elem T) bool {
+	for _, v := range arr {
+		if v == elem {
+			return true
+		}
+	}
+	return false
+}
+
+func IndexOf[T comparable](arr []T, elem T) int {
+	for i, v := range arr {
+		if v == elem {
+			return i
+		}
+	}
+	return -1
+}
