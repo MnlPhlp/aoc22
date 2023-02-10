@@ -46,16 +46,14 @@ var cacheRoomStates = map[int][][]bool{}
 func bfs(blizzards []blizzard, start, end [2]int, totalRows, totalCols, stepsElapsedAlready int) int {
 
 	type node struct {
-		coords    [2]int
-		steps     int
-		debugPath string
+		coords [2]int
+		steps  int
 	}
 
 	queue := []node{}
 	queue = append(queue, node{
-		coords:    start,
-		steps:     stepsElapsedAlready,
-		debugPath: fmt.Sprint(0, start),
+		coords: start,
+		steps:  stepsElapsedAlready,
 	})
 
 	seenCoordsSteps := map[[3]int]bool{}
@@ -116,18 +114,16 @@ func bfs(blizzards []blizzard, start, end [2]int, totalRows, totalCols, stepsEla
 			}
 
 			queue = append(queue, node{
-				coords:    nextCoords,
-				steps:     popped.steps + 1,
-				debugPath: popped.debugPath + fmt.Sprint(popped.steps+1, nextCoords),
+				coords: nextCoords,
+				steps:  popped.steps + 1,
 			})
 		}
 		// if possible to stay still, add "wait" move
 		if popped.coords == start ||
 			!occupied[popped.coords[0]][popped.coords[1]] {
 			queue = append(queue, node{
-				coords:    popped.coords,
-				steps:     popped.steps + 1,
-				debugPath: popped.debugPath + fmt.Sprint(popped.steps+1, popped.coords),
+				coords: popped.coords,
+				steps:  popped.steps + 1,
 			})
 		}
 	}
