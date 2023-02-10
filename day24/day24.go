@@ -41,8 +41,9 @@ type Grid struct {
 
 // code below largely taken from https://github.com/alexchao26/advent-of-code-go because i wanted to finish all days without spending more time on my stupid bugs
 
+var cacheRoomStates = map[int][][]bool{}
+
 func bfs(blizzards []blizzard, start, end [2]int, totalRows, totalCols, stepsElapsedAlready int) int {
-	cacheRoomStates := map[int][][]string{}
 
 	type node struct {
 		coords    [2]int
@@ -62,7 +63,7 @@ func bfs(blizzards []blizzard, start, end [2]int, totalRows, totalCols, stepsEla
 		popped := queue[0]
 		queue = queue[1:]
 
-		roomState := calcOrGetRoomState(blizzards, popped.steps+1, totalRows, totalCols, cacheRoomStates)
+		occupied := calcOrGetRoomState(blizzards, popped.steps+1, totalRows, totalCols, cacheRoomStates)
 
 		for _, diff := range [][2]int{
 			{1, 0},
@@ -97,7 +98,7 @@ func bfs(blizzards []blizzard, start, end [2]int, totalRows, totalCols, stepsEla
 
 			// if blocked, continue
 			if nextCoords != start && nextCoords != end &&
-				roomState[nextCoords[0]][nextCoords[1]] != "." {
+				occupied[nextCoords[0]][nextCoords[1]] {
 				continue
 			}
 
@@ -122,7 +123,7 @@ func bfs(blizzards []blizzard, start, end [2]int, totalRows, totalCols, stepsEla
 		}
 		// if possible to stay still, add "wait" move
 		if popped.coords == start ||
-			roomState[popped.coords[0]][popped.coords[1]] == "." {
+			!occupied[popped.coords[0]][popped.coords[1]] {
 			queue = append(queue, node{
 				coords:    popped.coords,
 				steps:     popped.steps + 1,
@@ -158,26 +159,19 @@ func (b blizzard) calculateCoords(steps int) [2]int {
 // occupied coordinates are easy to calculate based on each blizzard's movement
 // and steps/time elapsed, return a matrix that represents occupied cells
 // and store the result in a map to reduce future calcs
-func calcOrGetRoomState(blizzards []blizzard, steps, totalRows, totalCols int, memo map[int][][]string) [][]string {
+func calcOrGetRoomState(blizzards []blizzard, steps, totalRows, totalCols int, memo map[int][][]bool) [][]bool {
 	if m, ok := memo[steps]; ok {
 		return m
 	}
 
-	matrix := make([][]string, totalRows)
+	matrix := make([][]bool, totalRows)
 	for r := range matrix {
-		matrix[r] = make([]string, totalCols)
+		matrix[r] = make([]bool, totalCols)
 	}
 
 	for _, b := range blizzards {
 		coords := b.calculateCoords(steps)
-		matrix[coords[0]][coords[1]] = b.char
-	}
-	for r := 0; r < len(matrix); r++ {
-		for c := 0; c < len(matrix[0]); c++ {
-			if matrix[r][c] == "" {
-				matrix[r][c] = "."
-			}
-		}
+		matrix[coords[0]][coords[1]] = true
 	}
 
 	memo[steps] = matrix
