@@ -60,7 +60,6 @@ pub fn solve(input: &str, test: bool, task: Task) -> (String, String) {
             .map(|r| find_duplicate(r.as_bytes()))
             .map(|d| get_priority(d))
             .sum();
-        println!("Result 1: {sum}");
         res1 = sum.to_string();
     }
     if !matches!(task, Task::One) {
@@ -71,7 +70,6 @@ pub fn solve(input: &str, test: bool, task: Task) -> (String, String) {
                 println!("Badge: {}", String::from_utf8(vec![b]).unwrap());
             }
         }
-        println!("\nResult 2: {badge_sum}");
         res2 = badge_sum.to_string();
     }
     return (res1, res2);

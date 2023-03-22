@@ -10,7 +10,7 @@ fn sum_calories(elves: &Vec<&str>) -> Vec<i32> {
         .collect()
 }
 
-pub fn solve(input: &str, _debug: bool, task: Task) -> (String, String) {
+pub fn solve(input: &str, _test: bool, task: Task) -> (String, String) {
     let mut res1 = "".to_string();
     let mut res2 = "".to_string();
 
@@ -21,12 +21,10 @@ pub fn solve(input: &str, _debug: bool, task: Task) -> (String, String) {
     if !matches!(task, Task::Two) {
         let max_calories = calories.last().unwrap();
         res1 = max_calories.to_string();
-        println!("Part 1: {}", res1);
     }
     if !matches!(task, Task::One) {
         let top_calories = calories.iter().rev().take(3).sum::<i32>();
         res2 = top_calories.to_string();
-        println!("Part 2: {}", res2);
     }
 
     (res1, res2)

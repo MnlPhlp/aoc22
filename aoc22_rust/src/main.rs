@@ -10,12 +10,13 @@ use types::Task;
 mod day01;
 mod day02;
 mod day03;
+mod day04;
 mod types;
 mod util;
 
 type SolveFunc = dyn Fn(&str, bool, Task) -> (String, String);
 
-const FUNCS: [&SolveFunc; 3] = [&day01::solve, &day02::solve, &day03::solve];
+const FUNCS: [&SolveFunc; 4] = [&day01::solve, &day02::solve, &day03::solve, &day04::solve];
 
 fn cap_length(msg: &str, length: usize) -> &str {
     if msg.len() <= length {
@@ -32,7 +33,9 @@ fn calc_day(
     test: bool,
     task: Task,
 ) {
-    println!("\n##################\ncalculating day {day} \n##################\n");
+    if test {
+        println!("\n##################\ncalculating day {day} \n##################\n");
+    }
     let start = Instant::now();
     let input = util::read_input(day, test);
     let (res1, res2) = FUNCS[day - 1](&input, test, task);

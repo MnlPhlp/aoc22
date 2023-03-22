@@ -68,7 +68,6 @@ pub fn solve(input: &str, _debug: bool, task: Task) -> (String, String) {
             }
             score += calc_score(line)
         }
-        println!("Score 1:{score}");
         res1 = score.to_string();
     }
 
@@ -80,7 +79,6 @@ pub fn solve(input: &str, _debug: bool, task: Task) -> (String, String) {
             }
             score += calc_score2(line)
         }
-        println!("Score 2:{score}");
         res2 = score.to_string();
     }
     (res1, res2)
