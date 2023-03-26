@@ -91,7 +91,7 @@ fn main() {
     let overall = Instant::now().duration_since(start);
 
     let mut results: String = "## Results:\n".into();
-    results += "day | result 1        | result 2        | time (ms) | % of overall time\n";
+    results += "day | result 1        | result 2        | time (ms) | % overall \n";
     results += "--: | :-------------: | :--------------:| --------: | :--------\n";
     for (i, day) in days.iter().enumerate() {
         results += &format!(
