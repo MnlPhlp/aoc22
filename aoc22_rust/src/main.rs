@@ -11,12 +11,19 @@ mod day01;
 mod day02;
 mod day03;
 mod day04;
+mod day05;
 mod types;
 mod util;
 
 type SolveFunc = dyn Fn(&str, bool, Task) -> (String, String);
 
-const FUNCS: [&SolveFunc; 4] = [&day01::solve, &day02::solve, &day03::solve, &day04::solve];
+const FUNCS: [&SolveFunc; 5] = [
+    &day01::solve,
+    &day02::solve,
+    &day03::solve,
+    &day04::solve,
+    &day05::solve,
+];
 
 fn cap_length(msg: &str, length: usize) -> &str {
     if msg.len() <= length {
